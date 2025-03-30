@@ -1,10 +1,17 @@
 {
-	"manifest_version": 3,
+	"mainfest_version": 3,
 	"name": "React Chrome Extension",
 	"version": "1.0.0",
 	"description": "amazon order collect",
 	"action": {
 		"default_popup": "index.html"
 	},
-	"permissions": []
+	"background": {
+		"service_worker": "background/background.js"
+	},
+	"permissions": [],
+	"host_permissions": [
+		"http://*/*",
+		"https://*/*"
+	]
 }
