@@ -39,15 +39,20 @@ export function getOrderCost(docText, country: string) {
 
 	let taxTotal: Number;
 	const taxTotalMatch = docText.match(regex.vatMatch)
+	console.log('tax', taxTotalMatch)
 	if (taxTotalMatch) {
 		taxTotal = Number(taxTotalMatch[1].replace(",", "."))
+
 	}
+	console.log('tax', taxTotal)
 
 	let total: Number;
 	const totalMatch = docText.match(regex.total)
 	if (totalMatch && totalMatch[1]) {
 		total = Number(totalMatch[1].replace(",", "."))
 	}
+
+	console.log('tax', total)
 
 	let paymentTotal: Number;
 	const paymentTotalMatch = docText.match(regex.paymentTotal)
@@ -69,9 +74,13 @@ export function getOrderCost(docText, country: string) {
 
 	return {
 		"buy_cost": Number((subTotal * rate).toFixed(2)),
+		"subTotal": Number((subTotal * rate).toFixed(2)),
 		"buy_tax": Number((taxTotal * rate).toFixed(2)),
 		"buy_shipping_fee": Number((delivCost * rate).toFixed(2)),
-		"rate": rate
+		"rate": rate,
+		"total": Number((total * rate).toFixed(2)),
+		"taxTotal": Number((taxTotal * rate).toFixed(2)),
+		paymentTotal,
 	}
 }
 

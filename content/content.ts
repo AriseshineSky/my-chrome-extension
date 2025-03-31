@@ -1,21 +1,13 @@
 let isProcessing = false;
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.type === "fetchOrders" && !isProcessing) {
-		isProcessing = true;
-		console.log("content script", message);
-		main()
-			.then(() => {
-				sendResponse({ success: true });
-			})
-			.catch((error) => {
-				sendResponse({ success: true });
-				console.log(error);
-			})
-			.finally(() => {
-				isProcessing = false;
-			});
+		if (sessionStorage.getItem('active')) {
+			console.log("already run")
+			return null;
+		}
+		sessionStorage.setItem("active", "1");
+		await main()
 	}
-	return true;
 });
 
 import { fetchInfo } from "../services/api";
@@ -35,7 +27,6 @@ const COOKIE_BY_COUNTRY = {
 };
 
 const ACCOUNT_RELATIVE_PATH = "/ax/account/manage";
-const NEXT_PAGE_SELECTOR = "ul.a-pagination > li.a-last > a";
 
 function getCurrentAmazonCountry() {
 	return (
@@ -81,13 +72,20 @@ async function getLoginInfo(): Promise<{ name: string; email: string } | null> {
 	}
 }
 
+main()
 async function main() {
-	if (sessionStorage.getItem("isRunning") === "true") {
-		console.log("Script is already running.");
-		return;
+	if (!sessionStorage.getItem('active')) {
+		console.log("not active")
+		return null;
 	}
 
-	sessionStorage.setItem("isRunning", "true");
+	await new Promise((resolve) => {
+		if (document.readyState === "complete" || document.readyState === "interactive") {
+			resolve();
+		} else {
+			document.addEventListener("DOMContentLoaded", resolve, { once: true });
+		}
+	});
 	try {
 		const country = getCurrentAmazonCountry();
 		console.log("country", country);
@@ -104,45 +102,23 @@ async function main() {
 			if (user === null || !user.email) {
 				user = await getLoginInfo();
 			}
-			if (user.email !== null) {
+			if (user !== null && user.email !== null) {
 				localStorage.setItem("user", JSON.stringify(user));
 			}
 
 			console.log(user);
-			const orders = await getOrders(document, country, user);
-			saveOrders(user, orders);
-			// goToNextPage();
+			const isDone = await getOrders(document, country, user)
+			if (isDone) {
+				chrome.runtime.sendMessage({ type: 'updateButton', data: { active: true } });
+				sessionStorage.removeItem('active')
+			}
+
 		} else {
 			console.log("Amazon not logged in");
 			return null;
 		}
 	} catch (error) {
 		console.error("Error in main():", error);
-	} finally {
-		sessionStorage.removeItem("isRunning");
 	}
 }
 
-function goToNextPage() {
-	const nextSel = document.querySelector(NEXT_PAGE_SELECTOR);
-	if (!nextSel) {
-		console.log("Page end. No next page found.");
-		return;
-	}
-
-	const nextHref = nextSel.getAttribute("href");
-	if (!nextHref) {
-		console.log("Next page URL is missing.");
-		return;
-	}
-
-	const fullUrl = getFullUrl(nextHref);
-	console.log("Navigating to next page:", fullUrl);
-
-	setTimeout(() => {
-		window.location.href = fullUrl;
-		setTimeout(() => {
-			main();
-		}, 5000);
-	}, 0);
-}

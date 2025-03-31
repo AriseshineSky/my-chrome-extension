@@ -1,11 +1,10 @@
+const BASE_URL = "https://fulfill.everymarket.com/api/v2/amazon_orders";
+const API_TOKEN = "your_secret_token_here";
 export async function fetchInfo(url: string): Promise<Document> {
 	try {
-		const response = await fetch(url, {
-			credentials: "include",
-		});
+		const response = await fetch(url, { credentials: "include" });
 
-		if (!response.ok)
-			throw new Error(`failed to fetch: ${url}, ${response.status}`);
+		if (!response.ok) throw new Error(`failed to fetch: ${url}, ${response.status}`);
 
 		const htmlText = await response.text();
 		const parser = new DOMParser();

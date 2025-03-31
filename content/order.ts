@@ -12,6 +12,8 @@ const PURCHASE_DATE_SELECTOR =
 const ORDER_TOTAL_COST_SELECTOR =
 	":scope div.order-header div.a-span2 span.aok-break-word";
 
+const NEXT_PAGE_SELECTOR = "ul.a-pagination > li.a-last > a";
+
 export async function getOrders(doc, country: string, user) {
 	const orders = {};
 	const divOrders = doc.querySelectorAll(ORDER_SELECTOR)
@@ -25,19 +27,40 @@ export async function getOrders(doc, country: string, user) {
 		} catch (e) {
 			console.log(e)
 		}
+
 	}
 
 	await saveOrders(user, orders)
 
-	// if (!isOrdersExpired(orders)) {
-	// 	goToNextPage()
-	// 	return false;
-	// } else {
-	// 	return true;
-	// }
+	if (!isOrdersExpired(orders)) {
+		goToNextPage()
+		return false;
+	} else {
+		return true;
+	}
+
 }
 
 
+function goToNextPage() {
+	const nextSel = document.querySelector(NEXT_PAGE_SELECTOR);
+	if (!nextSel) {
+		console.log("Page end. No next page found.");
+		return;
+	}
+
+	const nextHref = nextSel.getAttribute("href");
+	if (!nextHref) {
+		console.log("Next page URL is missing.");
+		sessionStorage.removeItem('active')
+		sessionStorage.removeItem("isRunning");
+		return;
+	}
+
+	const fullUrl = getFullUrl(nextHref);
+	console.log("Navigating to next page:", fullUrl);
+	window.location.href = fullUrl;
+}
 const ORDER_URL_SELECTOR =
 	"div.a-row .yohtmlc-order-details-link, div.a-row > div.yohtmlc-order-level-connections a";
 
@@ -81,7 +104,6 @@ async function getOrderBasicInfo(doc, country) {
 		country,
 	);
 	const rate = cost.rate;
-	console.log(rate)
 	const address = getShippingAddress(doc);
 	const shipments = await getShipments(doc, country, rate);
 
@@ -158,11 +180,37 @@ function getShipmentItems(orderItems, cost) {
 		const item = { asin }
 		item["cost"] = orderItems[asin]["cost"]
 		item["quantity"] = orderItems[asin]["quantity"]
-		item["tax"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost?.taxTotal ?? null)).toFixed(2)
+		item["tax"] = Number(Number(item["cost"]) / Number(cost.subTotal ?? null) * Number(cost?.taxTotal ?? null)).toFixed(2)
 		item["shipping_fee"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost?.buy_shipping_fee ?? null)).toFixed(2)
 		items.push(item)
 	}
 	return items;
 }
 
+export function isOrdersExpired(orders) {
+	for (const orderNumber in orders) {
+		if (checkExpiredOrderDate(orders[orderNumber]["buy_order_date"])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function checkExpiredOrderDate(dateStr) {
+	const inputDate = new Date(dateStr);
+	if (isNaN(inputDate)) {
+		return false;
+	}
+
+	const currentDate = new Date();
+	const threeMonthsAgo = new Date();
+	threeMonthsAgo.setMonth(currentDate.getMonth() - 3);
+
+	return inputDate < threeMonthsAgo;
+}
+
+function getFullUrl(relativePath) {
+	const fullUrl = new URL(relativePath, window.location.origin);
+	return fullUrl.href;
+}
 

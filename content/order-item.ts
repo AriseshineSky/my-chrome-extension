@@ -39,9 +39,7 @@ function getOrderItemFromElem(orderItemElem, country, rate) {
 	}
 	const asin = getAsinFromUrl(itemUrl)
 	const priceStr = orderItemElem.querySelector(PRICE_SELECTOR)?.textContent?.trim()
-	console.log(priceStr)
 	const price = getAmountFromStr(priceStr, country, rate)
-	console.log(price)
 	let quantity = 1
 	let quantSel = orderItemElem.querySelector(QUANTITY_SELECTOR)
 	if (quantSel) {
