@@ -9,6 +9,7 @@ export const REGEX_BY_COUNTRY = {
 		"subtotalMatch": /Item\(s\) Subtotal: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
 		"vatMatch": /Estimated tax to be collected: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
 		"postageMatch": /Shipping & Handling: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		"total": /Grand Total: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
 		"paymentTotal": /Grand Total: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
 	},
 	"uk": {
@@ -51,7 +52,7 @@ export function getOrderCost(docText, country: string) {
 		total = Number(totalMatch[1].replace(",", "."))
 	}
 
-	console.log('tax', total)
+	console.log('total', total)
 
 	let paymentTotal: Number;
 	const paymentTotalMatch = docText.match(regex.paymentTotal)
