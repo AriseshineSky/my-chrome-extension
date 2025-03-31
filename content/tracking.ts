@@ -41,9 +41,7 @@ function getTrackInfoFromText(trackNoStr, carrierStr) {
 
 export async function fetchTrackInfo(delivBox) {
 	const rightButtons = delivBox.querySelectorAll(track_elem_selector);
-	console.log(rightButtons);
 	for (const rb of rightButtons) {
-		console.log(rb.textContent);
 		if (
 			rb.textContent.includes("Track package") ||
 			rb.textContent.includes("Lieferung verfolgen")

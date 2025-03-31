@@ -22,7 +22,7 @@ export async function getOrders(doc, country) {
 }
 
 const ORDER_URL_SELECTOR =
-	"div.a-row a.yohtmlc-order-details-link, div.a-row > div.yohtmlc-order-level-connections > a";
+	"div.a-row .yohtmlc-order-details-link, div.a-row > div.yohtmlc-order-level-connections a";
 
 function getOrderDetailUrl(divOrder) {
 	const orderDetailUrl = divOrder.querySelector(ORDER_URL_SELECTOR);
@@ -38,9 +38,11 @@ async function getOrderInfo(divOrder, country) {
 	const orderNo = divOrder
 		.querySelector(ORDER_NUMBER_SELECTOR)
 		.textContent.trim();
+
 	const orderTotalCostStr = divOrder
 		.querySelector(ORDER_TOTAL_COST_SELECTOR)
 		?.textContent.trim();
+
 	const orderTotalCost = getAmountFromStr(orderTotalCostStr, country);
 	const orderDate = getDateObj(
 		divOrder
@@ -59,7 +61,6 @@ async function getOrderInfo(divOrder, country) {
 		buy_order_date: orderDate.toISOString().split("T")[0],
 		...orderBasicInfo,
 	};
-	console.log(orderInfo);
 	return orderInfo;
 }
 
