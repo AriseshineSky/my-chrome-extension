@@ -41,6 +41,12 @@ export async function getOrders(doc, country: string, user) {
 
 }
 
+export function goToOrderHistoryPage() {
+	const orderHistoryPage = "/your-orders/orders"
+	const fullUrl = getFullUrl(orderHistoryPage);
+	console.log("Go to order history:", fullUrl);
+	window.location.href = fullUrl;
+}
 
 function goToNextPage() {
 	const nextSel = document.querySelector(NEXT_PAGE_SELECTOR);

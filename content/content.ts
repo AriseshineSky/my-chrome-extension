@@ -1,3 +1,5 @@
+import { fetchInfo } from "../services/api";
+import { getOrders, goToOrderHistoryPage } from "./order";
 let isProcessing = false;
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.type === "fetchOrders" && !isProcessing) {
@@ -6,12 +8,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 			return null;
 		}
 		sessionStorage.setItem("active", "1");
-		await main()
+		goToOrderHistoryPage()
 	}
 });
 
-import { fetchInfo } from "../services/api";
-import { getOrders, saveOrders } from "./order";
 
 const DOMAIN_BY_COUNTRY = {
 	us: "amazon.com",
