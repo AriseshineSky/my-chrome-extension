@@ -101,9 +101,9 @@ async function main() {
 
 			const user = await getLoginInfo();
 			console.log(user);
-			const orders = await getOrders(document, country);
+			const orders = await getOrders(document, country, user);
 			saveOrders(user, orders);
-			goToNextPage();
+			// goToNextPage();
 		} else {
 			console.log("Amazon not logged in");
 			return null;
