@@ -109,8 +109,8 @@ async function main() {
 			console.log(user);
 			const isDone = await getOrders(document, country, user)
 			if (isDone) {
-				chrome.runtime.sendMessage({ type: 'updateButton', data: { active: true } });
 				sessionStorage.removeItem('active')
+				chrome.runtime.sendMessage({ type: 'updateButton', data: { active: true } });
 			}
 
 		} else {
