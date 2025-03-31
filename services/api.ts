@@ -1,17 +1,17 @@
 const BASE_URL = "https://fulfill.everymarket.com/api/v2/amazon_orders";
 const API_TOKEN = "your_secret_token_here";
-export async function fetchInfo(url: string): Promise<Document> {
+export async function fetchInfo(url: string): Promise<Document | null> {
 	try {
 		const response = await fetch(url, { credentials: "include" });
 
-		if (!response.ok) throw new Error(`failed to fetch: ${url}, ${response.status}`);
+		if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
 
 		const htmlText = await response.text();
 		const parser = new DOMParser();
 		return parser.parseFromString(htmlText, "text/html");
 	} catch (error) {
-		console.log("fetch info error:", error);
-		throw error;
+		console.error("fetch info error:", error);
+		return null;
 	}
 }
 
@@ -21,7 +21,7 @@ export function sleep(ms) {
 
 const headers = new Headers({ "Content-Type": "application/json" });
 
-async function retryFetch(url: string, options: RequestInit, retries = 5) {
+async function retryFetch(url: string, options: RequestInit, retries = 5, delay = 2000) {
 	for (let i = retries; i > 0; i--) {
 		try {
 			console.log(`API request (${retries - i + 1}/${retries}) to: ${url}`);
