@@ -1,6 +1,6 @@
 import { getOrderCost, getShippingAddress } from "./order-details";
 import { getShipments } from "./order-item";
-import { fetchInfo, post, put } from "./utils/httpUtils";
+import { fetchInfo, post, put } from "../services/api";
 import { getDateObj } from "./time-utils";
 
 const ORDER_SELECTOR = "div.order-card";

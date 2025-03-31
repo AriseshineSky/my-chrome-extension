@@ -1,23 +1,22 @@
-const { parse, addDays, subDays } = require('date-fns')
-const { enUS, de, enGB } = require('date-fns/locale')
+import { parse, addDays, subDays } from "date-fns";
+import { enUS, de, enGB } from "date-fns/locale";
 
-function getDateObj(dateStr, region = 'us') {
-	let retDate
+export function getDateObj(dateStr, region = "us") {
+	let retDate;
 	const localeMap = {
 		us: enUS,
 		de: de,
-		uk: enGB
-
-	}
+		uk: enGB,
+	};
 	const formatMap = {
 		us: "MMMM dd, yyyy",
 		de: "dd. MMMM yyyy",
-		uk: "dd MMMM yyyy"
-	}
+		uk: "dd MMMM yyyy",
+	};
 	const locale = localeMap[region] || enUS;
 
-	const today = new Date()
-	const currentYear = today.getFullYear()
+	const today = new Date();
+	const currentYear = today.getFullYear();
 
 	if (dateStr.toLowerCase().includes("today")) {
 		retDate = today;
@@ -33,13 +32,9 @@ function getDateObj(dateStr, region = 'us') {
 			}
 		} catch (e) {
 			console.error("Failed to parse date: ", e);
-			retDate = new Date("Invalid Date")
+			retDate = new Date("Invalid Date");
 		}
 	}
 
-	return retDate
-}
-
-module.exports = {
-	getDateObj
+	return retDate;
 }
