@@ -131,8 +131,8 @@ function convertOrderToPost(order) {
 	if (order.cost?.paymenTotal) {
 		order.buy_cost = order.cost.paymenTotal
 	};
-	order.buy_shipping_fee = order.cost?.buy_shipping_fee
-	order.buy_tax = order.cost?.taxTotal
+	order.buy_shipping_fee = order.cost?.buy_shipping_fee ?? 0
+	order.buy_tax = order.cost?.taxTotal ?? null
 	order.shipments = formatShipments(order.shipments, order.cost)
 	order.last_checked_at = new Date().toISOString()
 	order.buy_shipping_address = order.address
@@ -158,8 +158,8 @@ function getShipmentItems(orderItems, cost) {
 		const item = { asin }
 		item["cost"] = orderItems[asin]["cost"]
 		item["quantity"] = orderItems[asin]["quantity"]
-		item["tax"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost.taxTotal)).toFixed(2)
-		item["shipping_fee"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost.buy_shipping_fee)).toFixed(2)
+		item["tax"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost?.taxTotal ?? null)).toFixed(2)
+		item["shipping_fee"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost?.buy_shipping_fee ?? null)).toFixed(2)
 		items.push(item)
 	}
 	return items;
