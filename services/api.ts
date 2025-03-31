@@ -52,9 +52,7 @@ async function retryFetch(url: string, options: RequestInit, retries = 5) {
 }
 
 export async function post(orders: any[]) {
-	const url = "test";
-	// const url =
-	// 	"https://fulfill.everymarket.com/api/v1/amazon_orders/batch_create?token=your_secret_token_here";
+	const url = "https://fulfill.everymarket.com/api/v1/amazon_orders/batch_create?token=your_secret_token_here";
 	const options: RequestInit = {
 		method: "POST",
 		headers: headers,
@@ -66,8 +64,7 @@ export async function post(orders: any[]) {
 }
 
 export async function put(order: Record<string, any>) {
-	// const url = `https://fulfill.everymarket.com/api/v1/amazon_orders/${order.buy_order_number}?token=your_secret_token_here`;
-	const url = "test";
+	const url = `https://fulfill.everymarket.com/api/v1/amazon_orders/${order.buy_order_number}?token=your_secret_token_here`;
 	const options: RequestInit = {
 		method: "PUT",
 		headers: headers,
