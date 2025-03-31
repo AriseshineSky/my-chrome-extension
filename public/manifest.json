@@ -1,6 +1,6 @@
 {
 	"manifest_version": 3,
-	"name": "React Chrome Extension",
+	"name": "amazon order collect",
 	"version": "1.0.0",
 	"description": "amazon order collect",
 	"action": {
