@@ -99,7 +99,15 @@ async function main() {
 		if (isLogged(country)) {
 			console.log("Amazon logged in");
 
-			const user = await getLoginInfo();
+			const userData = localStorage.getItem("user");
+			let user = userData ? JSON.parse(userData) : null;
+			if (user === null || !user.email) {
+				user = await getLoginInfo();
+			}
+			if (user.email !== null) {
+				localStorage.setItem("user", JSON.stringify(user));
+			}
+
 			console.log(user);
 			const orders = await getOrders(document, country, user);
 			saveOrders(user, orders);

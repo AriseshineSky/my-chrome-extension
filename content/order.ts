@@ -19,6 +19,7 @@ export async function getOrders(doc, country: string, user) {
 		try {
 			const order = await getOrderInfo(divOrder, country)
 			if (order && order.buy_order_number) {
+				order['buy_account'] = user.email;
 				orders[order.buy_order_number] = order;
 			}
 		} catch (e) {
@@ -28,12 +29,12 @@ export async function getOrders(doc, country: string, user) {
 
 	await saveOrders(user, orders)
 
-	if (!isOrdersExpired(orders)) {
-		goToNextPage()
-		return false;
-	} else {
-		return true;
-	}
+	// if (!isOrdersExpired(orders)) {
+	// 	goToNextPage()
+	// 	return false;
+	// } else {
+	// 	return true;
+	// }
 }
 
 
@@ -104,26 +105,64 @@ function saveOrdersToLocal(user, orders) {
 }
 
 export async function saveOrders(user, orders) {
-	const localOrders = getOrdersFromLocal(user) || {};
+	const localOrders = getOrdersFromLocal(user)
 	const newOrders = [];
 
-	for (const orderNumber in orders) {
-		if (localOrders[orderNumber]) {
-			if (
-				JSON.stringify(localOrders[orderNumber]) !==
-				JSON.stringify(orders[orderNumber])
-			) {
-				await put(orders[orderNumber]);
-			}
+	for (let orderNumber in orders) {
+		const newOrder = convertOrderToPost(orders[orderNumber])
+		newOrder.buy_account = user.email
+
+		newOrders.push(newOrder)
+		localOrders[orderNumber] = orders[orderNumber];
+
+		if (orderNumber in localOrders) {
+			await put(orders[orderNumber])
 		} else {
-			newOrders.push(orders[orderNumber]);
+			newOrders.push(newOrder)
 			localOrders[orderNumber] = orders[orderNumber];
 		}
 	}
-
-	if (newOrders.length > 0) {
-		await post(newOrders);
-	}
-
-	saveOrdersToLocal(user, localOrders);
+	await post(newOrders);
+	// saveOrdersToLocal(user, localOrders);
 }
+
+
+function convertOrderToPost(order) {
+	if (order.cost?.paymenTotal) {
+		order.buy_cost = order.cost.paymenTotal
+	};
+	order.buy_shipping_fee = order.cost?.buy_shipping_fee
+	order.buy_tax = order.cost?.taxTotal
+	order.shipments = formatShipments(order.shipments, order.cost)
+	order.last_checked_at = new Date().toISOString()
+	order.buy_shipping_address = order.address
+	return order;
+}
+function formatShipments(shipments, cost) {
+	const newShipments = []
+	for (const shipmentId in shipments) {
+		const shipment = {}
+		shipment["shipment_id"] = shipmentId
+		shipment["shipment_status"] = shipments[shipmentId]['shipmentStatus']
+		shipment["tracking"] = shipments[shipmentId]['trackingInfo']['tracking']
+		shipment["carrier"] = shipments[shipmentId]['trackingInfo']['carrier']
+		shipment["items"] = getShipmentItems(shipments[shipmentId]['orderItems'], cost)
+		newShipments.push(shipment)
+	}
+	return newShipments;
+}
+
+function getShipmentItems(orderItems, cost) {
+	const items = []
+	for (const asin in orderItems) {
+		const item = { asin }
+		item["cost"] = orderItems[asin]["cost"]
+		item["quantity"] = orderItems[asin]["quantity"]
+		item["tax"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost.taxTotal)).toFixed(2)
+		item["shipping_fee"] = Number(Number(item["cost"]) / Number(cost.subTotal) * Number(cost.buy_shipping_fee)).toFixed(2)
+		items.push(item)
+	}
+	return items;
+}
+
+
