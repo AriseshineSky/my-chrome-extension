@@ -1,14 +1,27 @@
 import { fetchInfo } from "../services/api";
 import { getOrders, goToOrderHistoryPage } from "./order";
 let isProcessing = false;
+
+export interface User {
+	name: string;
+	email: string;
+}
+
+function clearSessionStorageAfterDelay(delayInMilliseconds: number) {
+	setTimeout(() => {
+		sessionStorage.clear();
+	}, delayInMilliseconds);
+}
+
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.type === "fetchOrders" && !isProcessing) {
 		if (sessionStorage.getItem('active')) {
-			console.log("already run")
+			console.log("already run");
 			return null;
 		}
 		sessionStorage.setItem("active", "1");
-		goToOrderHistoryPage()
+		clearSessionStorageAfterDelay(1000 * 60 * 60 * 2);
+		goToOrderHistoryPage();
 	}
 });
 
@@ -73,6 +86,7 @@ async function getLoginInfo(): Promise<{ name: string; email: string } | null> {
 }
 
 main()
+
 async function main() {
 	if (!sessionStorage.getItem('active')) {
 		console.log("not active")
@@ -86,6 +100,7 @@ async function main() {
 			document.addEventListener("DOMContentLoaded", resolve, { once: true });
 		}
 	});
+
 	try {
 		const country = getCurrentAmazonCountry();
 		console.log("country", country);
@@ -109,7 +124,7 @@ async function main() {
 			console.log(user);
 			const isDone = await getOrders(document, country, user)
 			if (isDone) {
-				sessionStorage.removeItem('active')
+				sessionStorage.removeItem('active');
 				chrome.runtime.sendMessage({ type: 'updateButton', data: { active: true } });
 			}
 

@@ -17,6 +17,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
+		"@testing-library/jest-dom": "^6.6.3",
+		"@testing-library/react": "^16.3.0",
 		"@types/chrome": "^0.0.313",
 		"@types/react": "^19.0.10",
 		"@types/react-dom": "^19.0.4",
@@ -27,7 +29,8 @@
 		"globals": "^15.15.0",
 		"typescript": "~5.7.2",
 		"typescript-eslint": "^8.24.1",
-		"vite": "^6.2.0",
-		"vite-plugin-chrome-extension": "^0.0.7"
+		"vite": "^6.3.5",
+		"vite-plugin-chrome-extension": "^0.0.7",
+		"vitest": "^3.1.3"
 	}
 }

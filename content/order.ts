@@ -1,6 +1,8 @@
 import { getOrderCost, getShippingAddress } from "./order-details";
 import { getShipments } from './shipment'
 
+import { User } from './content'
+
 import { fetchInfo, post, put } from "../services/api";
 import { getDateObj } from "./time-utils";
 import { RATES } from "./rate";
@@ -14,12 +16,13 @@ const ORDER_TOTAL_COST_SELECTOR =
 
 const NEXT_PAGE_SELECTOR = "ul.a-pagination > li.a-last > a";
 
-export async function getOrders(doc, country: string, user) {
+export async function getOrders(doc: Document, country: string, user: User) {
 	const orders = {};
 	const divOrders = doc.querySelectorAll(ORDER_SELECTOR)
 	for (const divOrder of divOrders) {
 		try {
-			const order = await getOrderInfo(divOrder, country)
+			const order = await getOrderInfo(divOrder, country);
+			console.log(order);
 			if (order && order.buy_order_number) {
 				order['buy_account'] = user.email;
 				orders[order.buy_order_number] = order;
@@ -67,8 +70,8 @@ function goToNextPage() {
 	console.log("Navigating to next page:", fullUrl);
 	window.location.href = fullUrl;
 }
-const ORDER_URL_SELECTOR =
-	"div.a-row .yohtmlc-order-details-link, div.a-row > div.yohtmlc-order-level-connections a";
+
+const ORDER_URL_SELECTOR = "div.a-row .yohtmlc-order-details-link, div.a-row > .yohtmlc-order-level-connections a";
 
 function getOrderDetailUrl(divOrder) {
 	const orderDetailUrl = divOrder.querySelector(ORDER_URL_SELECTOR);
@@ -102,7 +105,6 @@ async function getOrderInfo(divOrder, country) {
 	console.log(orderInfo)
 	return orderInfo;
 }
-
 
 async function getOrderBasicInfo(doc, country) {
 	const cost = getOrderCost(
@@ -163,9 +165,10 @@ function convertOrderToPost(order) {
 	order.buy_tax = order.cost?.taxTotal ?? null
 	order.shipments = formatShipments(order.shipments, order.cost)
 	order.last_checked_at = new Date().toISOString()
-	order.buy_shipping_address = order.address
+	order.buy_shipping_address = order.address;
 	return order;
 }
+
 function formatShipments(shipments, cost) {
 	const newShipments = []
 	for (const shipmentId in shipments) {
@@ -215,7 +218,7 @@ function checkExpiredOrderDate(dateStr) {
 	return inputDate < threeMonthsAgo;
 }
 
-function getFullUrl(relativePath) {
+function getFullUrl(relativePath: string) {
 	const fullUrl = new URL(relativePath, window.location.origin);
 	return fullUrl.href;
 }
