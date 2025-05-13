@@ -27,6 +27,11 @@ async function retryFetch(url: string, options: RequestInit, retries = 5, delay 
 			console.log(`API request (${retries - i + 1}/${retries}) to: ${url}`);
 			const resp = await fetch(url, options);
 
+			if (resp.status === 404) {
+				console.error(`Received 404. Not retrying. URL: ${url}`);
+				return null;
+			}
+
 			if (resp.ok) {
 				const respJson = await resp.json();
 				console.log("Response received:", respJson);
