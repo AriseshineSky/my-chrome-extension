@@ -64,6 +64,18 @@ export async function post(orders: any[]) {
 	};
 
 	const response = await retryFetch(url, options);
+	await sendLog({
+		source: "amazon-order",
+		level: response ? 'info' : 'error',
+		message: response
+			? `Synced ${orders.length} orders successfully.`
+			: `Failed to sync ${orders.length} orders.`,
+		metadata: {
+			endpoint: "batch_create",
+			order_count: orders.length,
+			request_body: orders,
+		},
+	});
 	return response !== null;
 }
 
@@ -76,5 +88,38 @@ export async function put(order: Record<string, any>) {
 	};
 
 	const response = await retryFetch(url, options);
+	await sendLog({
+		source: "amazon-order",
+		level: response ? 'info' : 'error',
+		message: response
+			? `Updated order ${order.buy_order_number} successfully.`
+			: `Failed to update order ${order.buy_order_number}.`,
+		metadata: {
+			endpoint: "update",
+			order_id: order.buy_order_number,
+			request_body: order,
+		},
+	});
 	return response !== null;
+}
+
+async function sendLog(log: {
+	source: string;
+	level: 'info' | 'warn' | 'error';
+	message: string;
+	metadata?: Record<string, any>;
+}) {
+	try {
+		await fetch('https://logging.everymarket.com/api/v1/logs', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer 7dfbd1c8a4e2453d9b2b569f37ce8b1c3c09e89157b7268cc60b6a4e35a68c51',
+				"X-Log-Source": "frontend",
+			},
+			body: JSON.stringify({ ...log, logged_at: new Date().toISOString() })
+		})
+	} catch (e) {
+		console.warn('Logging failed', e);
+	}
 }
