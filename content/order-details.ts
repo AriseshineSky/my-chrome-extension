@@ -84,7 +84,7 @@ export function getOrderCost(docText, country: string) {
 	}
 }
 
-const SHIPPING_ADDRES_SELECTOR = 'li.displayAddressLI'
+const SHIPPING_ADDRES_SELECTOR = 'li.displayAddressLI, [data-component="shippingAddress"] ul li span'
 
 export function getShippingAddress(doc) {
 	const shipAddrSels = doc.querySelectorAll(SHIPPING_ADDRES_SELECTOR)
