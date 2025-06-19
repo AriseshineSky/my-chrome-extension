@@ -7,7 +7,7 @@ import { getAmountFromStr } from "./money-utils"
 
 export function getOrderItems(shipmentElem, country = null, rate = null) {
 	const orderItemElems = shipmentElem.querySelectorAll(ORDER_ITEM_SELECTOR)
-	let orderItems = []
+	let orderItems = {}
 	for (let orderItemElem of orderItemElems) {
 		const orderItem = getOrderItemFromElem(orderItemElem, country, rate)
 		orderItems[orderItem.asin] = orderItem;

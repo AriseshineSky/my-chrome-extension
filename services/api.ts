@@ -46,8 +46,8 @@ async function retryFetch(url: string, options: RequestInit, retries = 5, delay 
 		}
 
 		if (i > 1) {
-			console.log("Retrying after 2s...");
-			await sleep(2000);
+			console.log("Retrying after wait...");
+			await sleep((6 - i) * 2000);
 		}
 	}
 
@@ -88,6 +88,7 @@ export async function put(order: Record<string, any>) {
 	};
 
 	const response = await retryFetch(url, options);
+	const isSuccess = response && !response.error && !response.errors;
 	await sendLog({
 		source: "amazon-order",
 		level: response ? 'info' : 'error',
@@ -103,7 +104,7 @@ export async function put(order: Record<string, any>) {
 	return response !== null;
 }
 
-async function sendLog(log: {
+export async function sendLog(log: {
 	source: string;
 	level: 'info' | 'warn' | 'error';
 	message: string;
