@@ -1,7 +1,7 @@
 import { fetchTrackInfo } from './tracking'
 import { getOrderItems } from './order-item'
 
-const SHIPMENTS_SELECTOR = 'div[data-component="shipments"] div.a-box'
+export const SHIPMENTS_SELECTOR = 'div[data-component="shipments"] div.a-box'
 const SHIPMENT_STATUS_SELECTOR = ':scope div.js-shipment-info-container div.a-row:nth-of-type(1) span, :scope div#shipment-top-row h4'
 const A_SELECTOR = ':scope a'
 

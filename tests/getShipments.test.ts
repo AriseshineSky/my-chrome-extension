@@ -39,4 +39,21 @@ describe('getShipments from local HTML', () => {
 
 		expect(JSON.stringify(result, null, 2)).toEqual(JSON.stringify(targetShipments, null, 2))
 	})
+
+	it('should extract shipments from 202-2103857-5887544.html', async () => {
+		const html = readFileSync(join(FIXTURE_DIR, '202-2103857-5887544.html'), 'utf-8')
+		const dom = new JSDOM(html)
+		const result = await getShipments(dom.window.document, 'UK', null)
+
+		const targetShipments = {
+			UXfxScdLW: {
+				shipmentId: 'UXfxScdLW',
+				orderItems: { "B012A8RF3O": { asin: 'B012A8RF3O', cost: 21.92, quantity: 1 } },
+				shipmentStatus: 'Delivered today',
+				trackingInfo: { tracking: 'MOCKTRACKING', carrier: 'MOCKCARRIER' }
+			}
+		}
+
+		expect(JSON.stringify(result, null, 2)).toEqual(JSON.stringify(targetShipments, null, 2))
+	})
 })

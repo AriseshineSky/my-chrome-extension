@@ -1,6 +1,7 @@
 import { fetchInfo } from "../services/api";
 const track_elem_selector =
-	':scope div[data-component="shipmentConnections"] a';
+	':scope div[data-component="shipmentConnections"] a, :scope span.track-package-button a'
+
 const trackNumberSelector = "div.pt-delivery-card-trackingId";
 const carrierSelector = "h3.a-spacing-small";
 
@@ -10,7 +11,7 @@ function getTrackElements(doc) {
 	return { trackNoStr, carrierStr };
 }
 
-function getTrackInfo(doc) {
+export function getTrackInfo(doc) {
 	const { trackNoStr, carrierStr } = getTrackElements(doc);
 	return getTrackInfoFromText(trackNoStr, carrierStr);
 }
