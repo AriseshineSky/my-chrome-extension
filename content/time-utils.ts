@@ -1,7 +1,8 @@
 import { parse, addDays, subDays } from "date-fns";
 import { enUS, de, enGB } from "date-fns/locale";
 
-export function getDateObj(dateStr, region = "us") {
+export function getDateObj(dateStr: String, region = "us") {
+	region = region.toLowerCase()
 	let retDate;
 	const localeMap = {
 		us: enUS,

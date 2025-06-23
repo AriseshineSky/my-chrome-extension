@@ -78,17 +78,26 @@ function getOrderDetailUrl(divOrder) {
 	return orderDetailUrl?.getAttribute("href").replace("css", "your-account");
 }
 
-function getAmountFromStr(orderTotalCostStr: string, country: string, rate = null): string {
+function getAmountFromStr(orderTotalCostStr: string, country: string, rate = null): String {
+	let match: RegExpMatchArray | null = null;
+	match = orderTotalCostStr.match(/^US\$(\d+(\.\d+)?)/)
+	if (match) {
+		return match[1]
+	}
+	match = orderTotalCostStr.match(/^\$(\d+(\.+d)?)/)
+	if (match) {
+		return match[1]
+	}
 	if (rate === null) {
 		rate = RATES[country];
 	}
 	return (Number(orderTotalCostStr.replace(/[$£]/g, "")) * rate).toFixed(2);
 }
 
-async function getOrderInfo(divOrder, country) {
-	const orderNo = divOrder.querySelector(ORDER_NUMBER_SELECTOR).textContent.trim()
+async function getOrderInfo(divOrder: HTMLElement, country: String) {
+	const orderNo = divOrder.querySelector(ORDER_NUMBER_SELECTOR)?.textContent?.trim()
 	const orderTotalCostStr = divOrder.querySelector(ORDER_TOTAL_COST_SELECTOR)?.textContent?.trim()
-	const orderDate = getDateObj(divOrder.querySelector(PURCHASE_DATE_SELECTOR).textContent.trim().toLowerCase(), country)
+	const orderDate = getDateObj(divOrder.querySelector(PURCHASE_DATE_SELECTOR)?.textContent?.trim()?.toLowerCase(), country)
 	const orderDetailUrl = getOrderDetailUrl(divOrder)
 	const orderBasicDoc = await fetchInfo(orderDetailUrl)
 
