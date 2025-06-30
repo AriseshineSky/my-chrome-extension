@@ -7,22 +7,44 @@ export interface User {
 	email: string;
 }
 
-function clearSessionStorageAfterDelay(delayInMilliseconds: number) {
-	setTimeout(() => {
-		sessionStorage.clear();
-	}, delayInMilliseconds);
+
+function markSessionActive() {
+	sessionStorage.setItem("active", "1");
+	clearSessionStorageAfterDelay(1000 * 60 * 60 * 2);
+}
+
+function shouldFetchOrders(message, isProcessing) {
+	return (
+		message.type === "fetchOrders" &&
+		!isProcessing &&
+		!sessionStorage.getItem("active")
+	)
+}
+
+function checkIfActiveExpired() {
+	const expiresAt = parseInt(sessionStorage.getItem("active_expires_at") || "0", 10);
+	if (Date.now() > expiresAt) {
+		sessionStorage.removeItem("active");
+		sessionStorage.removeItem("active_expires_at");
+		console.log("Session expired");
+	}
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.type === "fetchOrders" && !isProcessing) {
 		if (sessionStorage.getItem('active')) {
 			console.log("already run");
-			return null;
+			sendResponse({ status: "already running" });
+			return;
 		}
+
 		sessionStorage.setItem("active", "1");
-		clearSessionStorageAfterDelay(1000 * 60 * 60 * 2);
+		sessionStorage.setItem("active_expires_at", Date.now() + 1000 * 60 * 60 * 2 + "");
+
 		goToOrderHistoryPage();
+		sendResponse({ status: "started" });
 	}
+	return true;
 });
 
 
@@ -87,19 +109,45 @@ async function getLoginInfo(): Promise<{ name: string; email: string } | null> {
 
 main()
 
-async function main() {
-	if (!sessionStorage.getItem('active')) {
-		console.log("not active")
-		return null;
-	}
+function isActive() {
+	return sessionStorage.getItem("active") !== null;
+}
 
-	await new Promise((resolve) => {
+function deactive() {
+	sessionStorage.removeItem("active");
+	chrome.runtime.sendMessage({type: "updateButton", data: {active: true}});
+}
+
+function ensureDomReady() {
+	return new Promise<void>((resolve) => {
 		if (document.readyState === "complete" || document.readyState === "interactive") {
 			resolve();
 		} else {
-			document.addEventListener("DOMContentLoaded", resolve, { once: true });
+			document.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
 		}
-	});
+	})
+}
+
+async function loadUser() {
+	const cached = localStorage.getItem("user");
+	if (cached) {
+		const user = JSON.parse(cached);
+		if (user?.email) return user;
+	}
+	const user = await getLoginInfo();
+	if (user?.email) localStorage.setItem("user", JSON.stringify(user));
+	return user;
+}
+
+export async function main() {
+	checkIfActiveExpired();
+
+	if (!isActive()) {
+		console.log("not active")
+		return;
+	}
+
+	await ensureDomReady()
 
 	try {
 		const country = getCurrentAmazonCountry();
@@ -109,29 +157,21 @@ async function main() {
 			return null;
 		}
 
-		if (isLogged(country)) {
-			console.log("Amazon logged in");
-
-			const userData = localStorage.getItem("user");
-			let user = userData ? JSON.parse(userData) : null;
-			if (user === null || !user.email) {
-				user = await getLoginInfo();
-			}
-			if (user !== null && user.email !== null) {
-				localStorage.setItem("user", JSON.stringify(user));
-			}
-
-			console.log(user);
-			const isDone = await getOrders(document, country, user)
-			if (isDone) {
-				sessionStorage.removeItem('active');
-				chrome.runtime.sendMessage({ type: 'updateButton', data: { active: true } });
-			}
-
-		} else {
+		if (!isLogged(country)) {
 			console.log("Amazon not logged in");
-			return null;
+			return;
 		}
+
+		console.log("Amazon logged in");
+
+		const user = await loadUser();
+		console.log(user);
+
+		const isDone = await getOrders(document, country, user)
+		if (isDone) {
+			deactive()
+		}
+
 	} catch (error) {
 		console.error("Error in main():", error);
 	}
