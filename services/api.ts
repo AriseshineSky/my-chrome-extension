@@ -124,3 +124,19 @@ export async function sendLog(log: {
 		console.warn('Logging failed', e);
 	}
 }
+
+export async function sendClickLog(email: string) {
+	try {
+		await fetch('https://fulfill.everymarket.com/api/v2/plugin_click_logs?token=your_secret_token_here', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ email: email })
+		})
+	} catch (e) {
+		console.warn('Logging failed', e);
+	}
+}
+
+

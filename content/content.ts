@@ -1,22 +1,20 @@
 import { fetchInfo } from "../services/api";
+import { sendClickLog } from "../services/api";
 import { getOrders, goToOrderHistoryPage } from "./order";
-let isProcessing = false;
 
 export interface User {
 	name: string;
 	email: string;
 }
 
-
 function markSessionActive() {
 	sessionStorage.setItem("active", "1");
 	clearSessionStorageAfterDelay(1000 * 60 * 60 * 2);
 }
 
-function shouldFetchOrders(message, isProcessing) {
+function shouldFetchOrders(message) {
 	return (
 		message.type === "fetchOrders" &&
-		!isProcessing &&
 		!sessionStorage.getItem("active")
 	)
 }
@@ -30,8 +28,14 @@ function checkIfActiveExpired() {
 	}
 }
 
+async function sendLog() {
+	const user = await loadUser();
+	sendClickLog(user?.email)
+}
+
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-	if (message.type === "fetchOrders" && !isProcessing) {
+	if (message.type === "fetchOrders") {
+		sendLog()
 		if (sessionStorage.getItem('active')) {
 			console.log("already run");
 			sendResponse({ status: "already running" });
@@ -115,6 +119,7 @@ function isActive() {
 
 function deactive() {
 	sessionStorage.removeItem("active");
+	sessionStorage.removeItem("active_expires_at");
 	chrome.runtime.sendMessage({type: "updateButton", data: {active: true}});
 }
 
