@@ -29,15 +29,131 @@ export const REGEX_BY_COUNTRY = {
 	},
 }
 
-export function getOrderCost(docText, country: string) {
-	const regex = REGEX_BY_COUNTRY[country.toLowerCase()]
+function getSubTotal(docText, country) {
 	let subTotal: Number;
-	const subTotalMatch = docText.match(regex.subtotalMatch)
+
+	const REGEX_BY_COUNTRY = {
+		"us": {
+			"subtotalMatch": /Item\(s\) Subtotal: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		},
+		"uk": {
+			"subtotalMatch": /\bTotal: (?:£|GBP )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		}
+	}
+	const REGEX_BY_COUNTRY_V2 = {
+		uk: {
+			subtotalMatch: /Item\(s\) Subtotal:\s*(?:USD|£|GBP)?\s*([\d,]+\.\d{2})/,
+		}
+	}
+	let regex = REGEX_BY_COUNTRY[country.toLowerCase()]
+	let subTotalMatch = docText.match(regex.subtotalMatch)
 
 	if (subTotalMatch) {
 		subTotal = Number(subTotalMatch[1].replace(",", "."));
+		return subTotal;
 	}
 
+	regex = REGEX_BY_COUNTRY_V2[country.toLowerCase()] ?? null;
+	if (regex === null) {
+		return null;
+	}
+
+	subTotalMatch = docText.match(regex.subtotalMatch)
+
+	if (subTotalMatch) {
+		subTotal = Number(subTotalMatch[1].replace(",", "."));
+		return subTotal;
+	}
+	return null;
+}
+
+function getRate(docText, paymentTotal, total) {
+	const match = docText.match(/1\s*GBP\s*=\s*([\d.]+)\s*USD/i);
+	let exchangeRate: number | null = null;
+	if (match) {
+		exchangeRate = Number(match[1])
+	}
+	return exchangeRate;
+	return Number((paymentTotal / total).toFixed(2));
+}
+
+function getExchangeGuaranteeFee(docText, paymentTotal, total) {
+
+}
+
+function getPaymentTotal(docText, country) {
+	const REGEX_BY_COUNTRY = {
+		us: {
+			paymentTotal: /Grand Total: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		},
+		uk: {
+			paymentTotal: /Payment Grand Total: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		}
+	}
+	const REGEX_BY_COUNTRY_V2 = {
+		uk: {
+			paymentTotal: /Grand Total: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		}
+	}
+	let paymentTotal: Number;
+
+	let regex = REGEX_BY_COUNTRY[country.toLowerCase()]
+	let subTotalMatch = docText.match(regex.subtotalMatch)
+	let paymentTotalMatch = docText.match(regex.paymentTotal)
+	if (paymentTotalMatch) {
+		paymentTotal = Number(paymentTotalMatch[1].replace(",", "."))
+		return paymentTotal;
+	}
+
+	regex = REGEX_BY_COUNTRY_V2[country.toLowerCase()] ?? null;
+	paymentTotalMatch = docText.match(regex.paymentTotal)
+	if (paymentTotalMatch) {
+		paymentTotal = Number(paymentTotalMatch[1].replace(",", "."))
+		return paymentTotal;
+	}
+	return null;
+}
+
+function getShippingFee(docText, country) {
+	let delivCost: Number;
+
+	const REGEX_BY_COUNTRY = {
+		us: {
+			postageMatch: /Shipping & Handling: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		},
+		uk: {
+			postageMatch: /Postage & Packing: (?:£|GBP )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		}
+	}
+	const REGEX_BY_COUNTRY_V2 = {
+		uk: {
+			postageMatch: /Postage & Packing: (?:\$|USD )(\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)/,
+		}
+	}
+
+	if (docText.includes("Free shipping") || docText.includes("Free Shipping") || docText.includes("Envío gratis")) {
+		delivCost = 0
+		return delivCost;
+	}
+	let regex = REGEX_BY_COUNTRY[country.toLowerCase()]
+	let delivCostMatch = docText.match(regex.postageMatch)
+	if (delivCostMatch) {
+		delivCost = Number(delivCostMatch[1].replace(",", "."));
+	}
+
+
+	regex = REGEX_BY_COUNTRY_V2[country.toLowerCase()] ?? null;
+	delivCostMatch = docText.match(regex.postageMatch)
+	if (delivCostMatch) {
+		delivCost = Number(delivCostMatch[1].replace(",", "."))
+		return delivCost;
+	}
+	return null;
+}
+
+export function getOrderCost(docText, country: string) {
+	const regex = REGEX_BY_COUNTRY[country.toLowerCase()]
+	let subTotal = getSubTotal(docText, country);
 	let taxTotal: Number;
 	const taxTotalMatch = docText.match(regex.vatMatch)
 	console.log('tax', taxTotalMatch)
@@ -54,23 +170,13 @@ export function getOrderCost(docText, country: string) {
 
 	console.log('total', total)
 
-	let paymentTotal: Number;
-	const paymentTotalMatch = docText.match(regex.paymentTotal)
-	if (paymentTotalMatch) {
-		paymentTotal = Number(paymentTotalMatch[1].replace(",", "."))
-	}
+	let paymentTotal = getPaymentTotal(docText, country);
 
-	let rate: Number = Number((paymentTotal / total).toFixed(2));
+	let rate: Number | null = getRate(docText, paymentTotal, total);
 
-	let delivCost: Number;
-	if (docText.includes("Free shipping") || docText.includes("Free Shipping") || docText.includes("Envío gratis")) {
-		delivCost = 0
-	} else {
-		const delivCostMatch = docText.match(regex.postageMatch)
-		if (delivCostMatch) {
-			delivCost = Number(delivCostMatch[1].replace(",", "."));
-		}
-	}
+	let delivCost = getShippingFee(docText, country);
+
+	let exchangeGuaranteeFee = getExchangeGuaranteeFee(docText, paymentTotal, total)
 
 	return {
 		"buy_cost": Number((subTotal * rate).toFixed(2)),
@@ -80,6 +186,7 @@ export function getOrderCost(docText, country: string) {
 		"rate": rate,
 		"total": Number((total * rate).toFixed(2)),
 		"taxTotal": Number(((taxTotal ?? 0) * rate).toFixed(2)),
+		"exchange_guarantee_fee": exchangeGuaranteeFee,
 		paymentTotal,
 	}
 }
