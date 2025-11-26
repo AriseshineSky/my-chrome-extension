@@ -115,6 +115,21 @@ async function getOrderInfo(divOrder: HTMLElement, country: String) {
 	return orderInfo;
 }
 
+export function extractOrderSummary(doc) {
+	const orderSummaryRegex = /(Item\(s\) Subtotal|Shipping & Handling|Promotion Applied|Total before tax|Estimated tax to be collected|Grand Total):\s*([-\$0-9.,]+)/g;
+
+  const result: Record<string, number> = {};
+  let match: RegExpExecArray | null;
+
+  while ((match = orderSummaryRegex.exec(text)) !== null) {
+    const label = match[1];
+    const value = parseFloat(match[2].replace(/[$,]/g, ""));
+    result[label] = value;
+  }
+
+  return result;
+}
+
 async function getOrderBasicInfo(doc, country) {
 	const cost = getOrderCost(
 		doc.body.textContent.replace(/\s+/g, " ").trim(),

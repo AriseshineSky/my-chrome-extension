@@ -139,8 +139,8 @@ function getShippingFee(docText, country) {
 	let delivCostMatch = docText.match(regex.postageMatch)
 	if (delivCostMatch) {
 		delivCost = Number(delivCostMatch[1].replace(",", "."));
+		return delivCost
 	}
-
 
 	regex = REGEX_BY_COUNTRY_V2[country.toLowerCase()] ?? null;
 	delivCostMatch = docText.match(regex.postageMatch)
@@ -151,24 +151,46 @@ function getShippingFee(docText, country) {
 	return null;
 }
 
+const labelKeyMap = {
+	"buy_cost": "Item(s) Subtotal",
+	"subTotal": "Item(s) Subtotal",
+	"buy_tax": "Estimated tax to be collected",
+	"buy_shipping_fee": "Shipping & Handling",
+	"paymentTotal": "Grand Total",
+	"total": "Grand Total",
+	"taxTotal": "Estimated tax to be collected",
+}
+
+
+export function extractOrderSummary(docText, country: string) {
+	const orderSummaryRegex = /(Item\(s\) Subtotal|Shipping & Handling|Promotion Applied|Total before tax|Estimated tax to be collected|Grand Total):\s*([-\$0-9.,]+)/g;
+
+  const result: Record<string, number> = {};
+  let match: RegExpExecArray | null;
+
+  while ((match = orderSummaryRegex.exec(docText)) !== null) {
+    const label = match[1];
+    const value = parseFloat(match[2].replace(/[$,]/g, ""));
+    result[label] = value;
+  }
+
+  return result;
+}
+
 export function getOrderCost(docText, country: string) {
 	const regex = REGEX_BY_COUNTRY[country.toLowerCase()]
 	let subTotal = getSubTotal(docText, country);
 	let taxTotal: Number;
 	const taxTotalMatch = docText.match(regex.vatMatch)
-	console.log('tax', taxTotalMatch)
 	if (taxTotalMatch) {
 		taxTotal = Number(taxTotalMatch[1].replace(",", "."))
 	}
-	console.log('tax', taxTotal)
 
 	let total: Number;
 	const totalMatch = docText.match(regex.total)
 	if (totalMatch && totalMatch[1]) {
 		total = Number(totalMatch[1].replace(",", "."))
 	}
-
-	console.log('total', total)
 
 	let paymentTotal = getPaymentTotal(docText, country);
 
@@ -178,7 +200,7 @@ export function getOrderCost(docText, country: string) {
 
 	let exchangeGuaranteeFee = getExchangeGuaranteeFee(docText, paymentTotal, total)
 
-	return {
+	const result = {
 		"buy_cost": Number((subTotal * rate).toFixed(2)),
 		"subTotal": Number((subTotal * rate).toFixed(2)),
 		"buy_tax": Number(((taxTotal ?? 0) * rate).toFixed(2)),
@@ -189,6 +211,20 @@ export function getOrderCost(docText, country: string) {
 		"exchange_guarantee_fee": exchangeGuaranteeFee,
 		paymentTotal,
 	}
+
+	if (country.toLowerCase() === 'us') {
+		const summary = extractOrderSummary(docText, country);
+
+		for (const key in labelKeyMap) {
+			if (Object.prototype.hasOwnProperty.call(labelKeyMap, key)) {
+				if (summary[labelKeyMap[key]]) {
+					result[key] = summary[labelKeyMap[key]];
+				}
+			}
+		}
+	}
+
+	return result;
 }
 
 const SHIPPING_ADDRES_SELECTOR = 'li.displayAddressLI, [data-component="shippingAddress"] ul li span'

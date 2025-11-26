@@ -33,11 +33,17 @@ describe("get order cost from local html", () => {
 	// 	expect(result.taxTotal).toEqual(19.13)
 	// 	expect(result.paymentTotal).toEqual(114.92)
 	// })
-	it("should extract order cost from 205-1272725-0305915.html", async () => {
-		const html = readFileSync(join(FIXTURE_DIR, "205-1272725-0305915.html"), "utf-8");
+	it("should extract order cost from 112-6514990-7723409.html", async () => {
+		const html = readFileSync(join(FIXTURE_DIR, "112-6514990-7723409.html"), "utf-8");
 		const dom = new JSDOM(html);
-		const result = getOrderCost(dom.window.document.body.textContent.replace(/\s+/g, " ").trim(), "uk");
+		const result = getOrderCost(dom.window.document.body.textContent.replace(/\s+/g, " ").trim(), "us");
 		console.log(result)
 	})
+	// it("should extract order cost from 205-1272725-0305915.html", async () => {
+	// 	const html = readFileSync(join(FIXTURE_DIR, "205-1272725-0305915.html"), "utf-8");
+	// 	const dom = new JSDOM(html);
+	// 	const result = getOrderCost(dom.window.document.body.textContent.replace(/\s+/g, " ").trim(), "uk");
+	// 	console.log(result)
+	// })
 })
 
