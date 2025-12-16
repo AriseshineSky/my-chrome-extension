@@ -1,3 +1,5 @@
+import 'source-map-support/register'
+
 function handleGetOrders(sendResponse) {
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		if (tabs.length === 0) {

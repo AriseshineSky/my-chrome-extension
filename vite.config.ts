@@ -21,6 +21,7 @@ export default defineConfig({
 		// setupFiles: ".src/test/setupTests.ts"
 	},
 	build: {
+		sourcemap: true,
 		outDir: "build",
 		rollupOptions: {
 			input: {
