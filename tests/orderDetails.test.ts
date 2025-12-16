@@ -54,13 +54,28 @@ const EXPECTED_ORDERS = {
 		subTotal: 14.16,
 		tax: 2.83,
 		shipping: 0,
-		total: 16.99,
+		total: 23.39,
 		original_currency: 'GBP',
 		original_cost: 16.99,
 		usd_cost: 23.39,
 		exchange_rate: 1.3767,
 		address: 'Levi Lyu, BRAND PORT EUROPE LTD UNIT 3 74 BELL LANE9654958Uckfield TN22 1QL, United Kingdom',
 		paymentMethod: 'AMEX ending in 1038'
+	},
+	"205-1272725-0305915.html": {
+		buy_order_number: '',
+		buy_order_date: '',
+		subTotal: 26.8,
+		tax: 0,
+		shipping: 0,
+		total: 27.44,
+		original_currency: 'USD',
+		original_cost: 27.44,
+		usd_cost: 27.44,
+		exchange_rate: 1,
+		address: 'Levi Lyu, BRAND PORT EUROPE LTD UNIT 3 74 BELL LANE1416359Uckfield TN22 1QL, United Kingdom',
+		paymentMethod: 'AMEX ending in 2085'
+
 	}
 };
 
