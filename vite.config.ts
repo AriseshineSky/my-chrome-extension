@@ -21,7 +21,7 @@ export default defineConfig({
 		// setupFiles: ".src/test/setupTests.ts"
 	},
 	build: {
-		sourcemap: true,
+		sourcemap: 'inline',
 		outDir: "build",
 		rollupOptions: {
 			input: {
@@ -30,7 +30,9 @@ export default defineConfig({
 				content: "./content/content.ts",
 			},
 			output: {
-				entryFileNames: "[name].js",
+				entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]'
 			},
 		},
 		minify: false,

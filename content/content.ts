@@ -7,18 +7,6 @@ export interface User {
 	email: string;
 }
 
-function markSessionActive() {
-	sessionStorage.setItem("active", "1");
-	clearSessionStorageAfterDelay(1000 * 60 * 60 * 2);
-}
-
-function shouldFetchOrders(message) {
-	return (
-		message.type === "fetchOrders" &&
-		!sessionStorage.getItem("active")
-	)
-}
-
 function checkIfActiveExpired() {
 	const expiresAt = parseInt(sessionStorage.getItem("active_expires_at") || "0", 10);
 	if (Date.now() > expiresAt) {
