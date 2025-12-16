@@ -1,60 +1,64 @@
 import { fetchInfo } from "../services/api";
-const track_elem_selector =
-	':scope div[data-component="shipmentConnections"] a, :scope span.track-package-button a'
 
-const trackNumberSelector = "div.pt-delivery-card-trackingId";
-const carrierSelector = "h3.a-spacing-small";
+const TRACK_ELEMENT_SELECTOR =
+  ':scope div[data-component="shipmentConnections"] a, :scope span.track-package-button a';
 
-function getTrackElements(doc) {
-	const trackNoStr = doc.querySelector(trackNumberSelector)?.textContent;
-	const carrierStr = doc.querySelector(carrierSelector)?.textContent;
-	return { trackNoStr, carrierStr };
+const TRACK_NUMBER_SELECTOR = "div.pt-delivery-card-trackingId";
+const CARRIER_SELECTOR = "h3.a-spacing-small";
+
+function getTrackElements(doc: Document) {
+  const trackNoStr = doc.querySelector(TRACK_NUMBER_SELECTOR)?.textContent ?? null;
+  const carrierStr = doc.querySelector(CARRIER_SELECTOR)?.textContent ?? null;
+  return { trackNoStr, carrierStr };
 }
 
-export function getTrackInfo(doc) {
-	const { trackNoStr, carrierStr } = getTrackElements(doc);
-	return getTrackInfoFromText(trackNoStr, carrierStr);
+export function getTrackInfo(doc: Document) {
+  const { trackNoStr, carrierStr } = getTrackElements(doc);
+  return getTrackInfoFromText(trackNoStr, carrierStr);
 }
 
-function getTrackInfoFromText(trackNoStr, carrierStr) {
-	let tracking = "";
-	if (trackNoStr !== null && trackNoStr !== undefined) {
-		tracking = trackNoStr.trim().split(" ").pop().split(":").pop();
-	}
+function getTrackInfoFromText(trackNoStr: string | null, carrierStr: string | null) {
+  let tracking: string | null = null;
+  let carrier: string | null = null;
 
-	let carrier = "";
-	if (carrierStr !== null && carrierStr !== undefined) {
-		const carrierText = carrierStr.trim().toLowerCase();
-		if (carrierText.includes("amazon")) {
-			carrier = "Amazon";
-		} else if (carrierText.startsWith("shipped with")) {
-			carrier = carrierStr.substring(13);
-		} else if (carrierText.startsWith("delivery by")) {
-			carrier = carrierStr.substring(12);
-		}
-	}
+  if (trackNoStr) {
+    const match = trackNoStr.match(/Tracking\s*ID:\s*(\S+)/i);
+    tracking = match ? match[1] : null;
+  }
 
-	return {
-		tracking: tracking,
-		carrier: carrier,
-	};
+  if (carrierStr) {
+    const text = carrierStr.trim();
+    if (/amazon/i.test(text)) {
+      carrier = "Amazon";
+    } else if (/shipped with/i.test(text)) {
+      carrier = text.replace(/shipped with/i, "").trim();
+    } else if (/delivery by/i.test(text)) {
+      carrier = text.replace(/delivery by/i, "").trim();
+    } else {
+      carrier = text;
+    }
+  }
+
+  return { tracking, carrier };
 }
 
-export async function fetchTrackInfo(delivBox) {
-	const rightButtons = delivBox.querySelectorAll(track_elem_selector);
-	for (const rb of rightButtons) {
-		if (
-			rb.textContent.includes("Track package") ||
-			rb.textContent.includes("Lieferung verfolgen")
-		) {
-			const trackdoc = await fetchInfo(rb.getAttribute("href"));
-			return getTrackInfo(trackdoc);
-		}
-	}
+export async function fetchTrackInfo(delivBox: Element) {
+  const links = delivBox.querySelectorAll(TRACK_ELEMENT_SELECTOR);
 
-	const empties = {
-		tracking: null,
-		carrier: null,
-	};
-	return empties;
+  for (const link of links) {
+    const text = link.textContent ?? "";
+    if (text.includes("Track package") || text.includes("Lieferung verfolgen")) {
+      const href = link.getAttribute("href");
+      if (!href) continue;
+
+      const trackDoc = await fetchInfo(href);
+      return getTrackInfo(trackDoc);
+    }
+  }
+
+  return {
+    tracking: null,
+    carrier: null,
+  };
 }
+

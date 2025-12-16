@@ -7,7 +7,7 @@ import { fetchInfo, post, put } from "../services/api";
 import { getDateObj } from "./time-utils";
 import { RATES } from "./rate";
 
-const ORDER_SELECTOR = "div.order-card";
+export const ORDER_SELECTOR = "div.order-card, div#orderCard";
 const ORDER_NUMBER_SELECTOR = ':scope bdi[dir="ltr"], :scope span[dir="ltr"]';
 const PURCHASE_DATE_SELECTOR =
 	":scope .a-column.a-span4 .a-size-base, :scope .a-column.a-span4 > .a-row.a-size-base, :scope div.a-span3 span.a-size-base, :scope div.a-span3 div.a-size-base > span";
@@ -16,9 +16,9 @@ const ORDER_TOTAL_COST_SELECTOR =
 
 const NEXT_PAGE_SELECTOR = "ul.a-pagination > li.a-last > a";
 
-export async function getOrders(doc: Document, country: string, user: User) {
+export async function getOrders(country: string, user: User) {
 	const orders = {};
-	const divOrders = doc.querySelectorAll(ORDER_SELECTOR)
+	const divOrders = document.querySelectorAll(ORDER_SELECTOR)
 	for (const divOrder of divOrders) {
 		try {
 			const order = await getOrderInfo(divOrder, country);
@@ -94,25 +94,65 @@ function getAmountFromStr(orderTotalCostStr: string, country: string, rate = nul
 	return (Number(orderTotalCostStr.replace(/[$£]/g, "")) * rate).toFixed(2);
 }
 
-async function getOrderInfo(divOrder: HTMLElement, country: String) {
-	const orderNo = divOrder.querySelector(ORDER_NUMBER_SELECTOR)?.textContent?.trim()
-	const orderTotalCostStr = divOrder.querySelector(ORDER_TOTAL_COST_SELECTOR)?.textContent?.trim()
-	const orderDate = getDateObj(divOrder.querySelector(PURCHASE_DATE_SELECTOR)?.textContent?.trim()?.toLowerCase(), country)
+export function extractOrderInfo(root: Element) {
+  const labelOrder = Array.from(root.querySelectorAll("span"))
+    .find(el => el.textContent?.trim() === "Order #");
+  const rowOrder = labelOrder?.closest(".a-row") ?? labelOrder?.parentElement;
+  const orderNumber = rowOrder?.textContent?.match(/\b\d{3}-\d{7}-\d{7}\b/)?.[0] ?? null;
+
+  const labelDate = Array.from(root.querySelectorAll(".a-column"))
+    .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.trim() === "Order placed");
+  const orderDate = labelDate?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
+
+  const labelTotal = Array.from(root.querySelectorAll(".a-column"))
+    .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.trim() === "Total");
+  const totalCost = labelTotal?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
+
+  const labelShipTo = root.querySelector(".a-column .a-popover-preload .a-text-bold");
+  const shipTo = labelShipTo?.textContent.trim() ?? null;
+
+  const labelPlacedBy = root.querySelector(".a-column:nth-child(4) .a-truncate-full");
+  const placedBy = labelPlacedBy?.textContent.trim() ?? null;
+
+  return {
+    orderNumber,
+    orderDate,
+    totalCost,
+    shipTo,
+    placedBy
+  };
+}
+
+
+async function getOrderInfo(divOrder: Element, country: String) {
+  const {
+    orderNumber,
+    orderDate: orderDateStr,
+		totalCost: orderTotalCostStr,
+    shipTo,
+    placedBy
+  } = extractOrderInfo(divOrder)
 	const orderDetailUrl = getOrderDetailUrl(divOrder)
 	const orderBasicDoc = await fetchInfo(orderDetailUrl)
-
 	const orderBasicInfo = await getOrderBasicInfo(orderBasicDoc, country);
 	const rate = orderBasicInfo.cost.rate;
 	const orderTotalCost = getAmountFromStr(orderTotalCostStr, country, rate);
+	const orderDateObj = new Date(orderDateStr);
+  const orderDateISO = isNaN(orderDateObj.getTime())
+    ? null
+    : orderDateObj.toISOString().split("T")[0];
 
 	const orderInfo = {
-		"buy_order_number": orderNo,
-		"buy_cost": orderTotalCost,
-		"buy_order_date": orderDate.toISOString().split("T")[0],
-		...orderBasicInfo,
-	}
-	console.log(orderInfo)
-	return orderInfo;
+		buy_order_number: orderNumber,
+    buy_cost: orderTotalCost,
+    buy_order_date: orderDateISO,
+    ship_to: shipTo,
+    placed_by: placedBy,
+    ...orderBasicInfo,
+  };
+
+  console.log(orderInfo);
+  return orderInfo;
 }
 
 export function extractOrderSummary(doc) {

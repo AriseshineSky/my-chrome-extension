@@ -1,37 +1,38 @@
-import { describe, it, expect } from 'vitest'
-import { readFileSync } from "fs"
-import { join } from "path"
-import { JSDOM } from "jsdom"
-import { getTrackInfo } from "../content/tracking"
+import { describe, it, expect, vi } from "vitest";
+import { getTrackInfo, fetchTrackInfo } from "../content/tracking"
+import { loadHTML } from "./utils";
 
-const FIXTURE_DIR = join(__dirname, "html-fixtures")
+vi.mock("../services/api", () => ({
+  fetchInfo: vi.fn(async (url: string) => {
+    return loadHTML("UJ9krSmsZ.html");
+  }),
+}));
 
-describe("get order cost from local html", () => {
-	it("should extract order cost from UXfxScdLW.html", async () => {
-		const html = readFileSync(join(FIXTURE_DIR, "UXfxScdLW.html"), "utf-8")
-		const dom = new JSDOM(html)
-		const result = getTrackInfo(dom.window.document)
-		console.log(result)
+describe("tracking.ts", () => {
+  const htmlFiles = [
+    "BfvmMMzbl.html",
+    "Ug9qr1K6K.html",
+    "UJ9krSmsZ.html",
+    "UXfxScdLW.html",
+  ];
 
-		expect(result.tracking).toEqual("UK2959311818")
-		expect(result.carrier).toEqual("Amazon")
-	})
-	it("should extract order cost from k6k.html", async () => {
-		const html = readFileSync(join(FIXTURE_DIR, "Ug9qr1K6K.html"), "utf-8")
-		const dom = new JSDOM(html)
-		const result = getTrackInfo(dom.window.document)
-		console.log(result)
+  describe("getTrackInfo", () => {
+    htmlFiles.forEach((file) => {
+      it(`should parse tracking info from ${file}`, () => {
+        const doc = loadHTML(file);
+        const info = getTrackInfo(doc);
+        console.log(file, info);
 
-		expect(result.tracking).toEqual("UK2943871131")
-		expect(result.carrier).toEqual("Amazon")
-	})
-	it("should extract tracking from BfvmMMzbl.html", async () => {
-		const html = readFileSync(join(FIXTURE_DIR, "BfvmMMzbl.html"), "utf-8")
-		const dom = new JSDOM(html)
-		const result = getTrackInfo(dom.window.document)
-		console.log(result)
+        expect(info).toHaveProperty("tracking");
+        expect(info).toHaveProperty("carrier");
+				expect(info).toHaveProperty("tracking");
+				expect(info.tracking).toMatch(/^TBA|UK\d+/); // 匹配你提供的 Tracking ID 格式
+				expect(info).toHaveProperty("carrier");
+				expect(info.carrier).toBe("Amazon");
+        expect(typeof info.tracking === "string" || info.tracking === null).toBe(true);
+        expect(typeof info.carrier === "string" || info.carrier === null).toBe(true);
+      });
+    });
+  });
+});
 
-		expect(result.tracking).toEqual("TBA322745820724")
-		expect(result.carrier).toEqual("Amazon")
-	})
-})

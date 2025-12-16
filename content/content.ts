@@ -160,7 +160,7 @@ export async function main() {
 		const user = await loadUser();
 		console.log(user);
 
-		const isDone = await getOrders(document, country, user)
+		const isDone = await getOrders(country, user)
 		if (isDone) {
 			deactive()
 		}

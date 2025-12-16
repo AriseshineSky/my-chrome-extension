@@ -39,7 +39,14 @@ function getOrderItemFromElem(orderItemElem, country, rate) {
 	}
 	const asin = getAsinFromUrl(itemUrl)
 	const priceStr = orderItemElem.querySelector(PRICE_SELECTOR)?.textContent?.trim()
+  const originalCost = priceStr ? Number(priceStr.replace(/[^0-9.,]/g, '')) : 0
+	const priceMatch = priceStr.match(/([^\d.,\s]+)?\s*([\d.,]+)/)
+  const currency = priceMatch?.[1] ?? null
+  const originalAmount = priceMatch?.[2] ? Number(priceMatch[2].replace(/,/g, '.')) : 0
+	const usdPerUnit = getAmountFromStr(priceStr, country, rate)
+
 	const price = getAmountFromStr(priceStr, country, rate)
+
 	let quantity = 1
 	let quantSel = orderItemElem.querySelector(QUANTITY_SELECTOR)
 	if (quantSel) {
@@ -49,7 +56,12 @@ function getOrderItemFromElem(orderItemElem, country, rate) {
 
 	return {
 		asin,
+		originalCost,
+		originalAmount,
+    originalCurrency: currency,
 		"cost": Number(Number(cost).toFixed(2)),
 		quantity,
+		rate,
+    priceStr
 	}
 }
