@@ -8,6 +8,7 @@ export interface OrderInfo {
   buy_order_date: string;
   original_currency: string;
   original_cost: number;
+	original_total: number;
   usd_cost: number;
   subTotal: number;
   tax: number;
@@ -22,10 +23,10 @@ export interface OrderInfo {
 
 async function convertOrderCostToUSD(cost: Record<string, any>) {
   if (cost.payment_total && cost.total && cost.original_currency) {
-    const rate = cost.payment_total / cost.total;
+    const rate = cost.payment_total / cost.original_total;
     return {
       ...cost,
-      usd_cost: Number((cost.total * rate).toFixed(2)),
+      usd_cost: Number((cost.original_total * rate).toFixed(2)),
       exchange_rate: Number(rate.toFixed(4)),
     };
   }
