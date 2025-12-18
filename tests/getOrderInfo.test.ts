@@ -23,8 +23,8 @@ const EXPECTED_ORDERS = {
 		shipping: 0,
 		original_currency: 'GBP',
 		original_cost: 19.94,
-		usd_cost: 19.94,
-		exchange_rate: 1,
+		usd_cost: 26.72,
+		exchange_rate: 1.34,
 		address: 'Amber Chiu, BIRD IN EYE FARMHOUSE BIRD IN EYE HILL8773969FRAMFIELD TN22 5HA, United Kingdom',
 		paymentMethod: 'Visa •••• 9618'
   },
@@ -51,11 +51,15 @@ describe("get order list from local html", () => {
 
 		const order = await getOrderInfo(
 			targetOrder!,
-			"uk",
 			localFetch
 		);
 		expect(order.original_currency).toBe(expect_order.original_currency);
-		expect(order.paymentMethod).toBe(expect_order.paymentMethod);
+		expect(order.original_cost).toBe(expect_order.original_cost);
+		expect(order.usd_cost).toBe(expect_order.usd_cost);
+		expect(order.exchange_rate).toBe(expect_order.exchange_rate);
+		expect(order.address).toBe(expect_order.address);
+		expect(order.buy_order_date).toBe(expect_order.buy_order_date);
+		expect(order.buy_order_number).toBe(expect_order.buy_order_number);
 	})
 })
 

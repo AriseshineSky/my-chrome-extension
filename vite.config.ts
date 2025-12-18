@@ -2,8 +2,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import path from "node:path";
 
 export default defineConfig({
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, "src"),
+		},
+	},
 	plugins: [
 		react(),
 		viteStaticCopy({
@@ -27,7 +33,7 @@ export default defineConfig({
 			input: {
 				main: "./index.html",
 				background: "./background/background.ts",
-				content: "./content/content.ts",
+				content: "./content/content-entry.ts",
 			},
 			output: {
 				entryFileNames: '[name].js',

@@ -1,0 +1,21 @@
+export const EXPECTED_TRACK_INFO: Record<
+  string,
+  { tracking: string | null; carrier: string | null }
+> = {
+  "tracking/BfvmMMzbl.html": {
+    tracking: "TBA322745820724",
+    carrier: "Amazon",
+  },
+  "tracking/Ug9qr1K6K.html": {
+    tracking: "UK2943871131",
+    carrier: "Amazon",
+  },
+  "tracking/UJ9krSmsZ.html": {
+    tracking: "UK3704754323",
+    carrier: "Amazon",
+  },
+  "tracking/UXfxScdLW.html": {
+    tracking: "UK2959311818",
+    carrier: "Amazon",
+  },
+};
