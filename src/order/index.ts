@@ -8,7 +8,7 @@ export async function syncOrders(user) {
   const orders = await collectOrdersOnPage();
   await saveOrders(user, orders);
 
-  if (!isOrdersExpired(orders)) {
+  if (orders && orders.length > 0 && !isOrdersExpired(orders)) {
     goToNextPage();
     return false;
   }

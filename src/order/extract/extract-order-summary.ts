@@ -9,10 +9,6 @@ export function extractOrderSummary(root: Element) {
     .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.trim() === "Order placed");
   const orderDate = labelDate?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
 
-  const labelTotal = Array.from(root.querySelectorAll(".a-column"))
-    .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.trim() === "Total");
-  const totalCost = labelTotal?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
-
   const labelShipTo = root.querySelector(".a-column .a-popover-preload .a-text-bold");
   const shipTo = labelShipTo?.textContent.trim() ?? null;
 
@@ -22,7 +18,6 @@ export function extractOrderSummary(root: Element) {
   return {
     orderNumber,
     orderDate,
-    totalCost,
     shipTo,
     placedBy
   };
