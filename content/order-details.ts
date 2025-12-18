@@ -13,7 +13,6 @@ export interface OrderInfo {
   subTotal: number;
   tax: number;
   shipping: number;
-  total: number;
   exchange_rate: number;
   address: string;
   paymentMethod: string | null;
@@ -21,50 +20,62 @@ export interface OrderInfo {
   shipments?: ShipmentInfo[];
 }
 
-async function convertOrderCostToUSD(cost: Record<string, any>) {
-  if (cost.payment_total && cost.total && cost.original_currency) {
-    const rate = cost.payment_total / cost.original_total;
-    return {
-      ...cost,
-      usd_cost: Number((cost.original_total * rate).toFixed(2)),
-      exchange_rate: Number(rate.toFixed(4)),
-    };
-  }
+async function convertOrderCostToUSD(
+  cost: Record<string, any>
+) {
+  const originalCurrency = cost.original_currency;
+  const originalCost = cost.original_cost;
 
-  if (cost.original_currency === "USD") {
-    return {
-      ...cost,
-      usd_cost: cost.original_cost,
-      exchange_rate: 1,
-    };
-  }
+  // ---------- Case 1: 页面提供了 USD 支付金额（ACC / 跨币） ----------
+  if (
+    cost.payment_total &&
+    cost.payment_currency === 'USD' &&
+    originalCost > 0
+  ) {
+    const rate =
+      originalCurrency === 'USD'
+        ? 1
+        : Number((cost.payment_total / originalCost).toFixed(6));
 
-  if (cost.original_currency && cost.original_cost) {
-    const rate = RATES[cost.original_currency]?.USD ?? 1;
     return {
       ...cost,
-      usd_cost: Number((cost.original_cost * rate).toFixed(2)),
+      usd_cost: cost.payment_total,
       exchange_rate: rate,
+      exchange_rate_source: 'page',
     };
   }
 
-  return cost;
-}
+  // ---------- Case 2: 原币就是 USD ----------
+  if (originalCurrency === 'USD' && originalCost > 0) {
+    return {
+      ...cost,
+      usd_cost: originalCost,
+      exchange_rate: 1,
+      exchange_rate_source: 'identity',
+    };
+  }
 
-function normalizeCurrency(raw: string): string {
-  const map: Record<string, string> = {
-    '$': 'USD',
-    'USD': 'USD',
-    '£': 'GBP',
-    'GBP': 'GBP',
-    '€': 'EUR',
-    'EUR': 'EUR',
-    'JPY': 'JPY',
-    'CAD': 'CAD',
-    'AUD': 'AUD',
+  // ---------- Case 3: 使用币种默认汇率 ----------
+  if (originalCurrency && originalCost > 0) {
+    const rate = RATES[originalCurrency];
+
+    if (rate) {
+      return {
+        ...cost,
+        usd_cost: Number((originalCost * rate).toFixed(2)),
+        exchange_rate: rate,
+        exchange_rate_source: 'default',
+      };
+    }
+  }
+
+  // ---------- Case 4: 无法计算 ----------
+  return {
+    ...cost,
+    usd_cost: 0,
+    exchange_rate: 1,
+    exchange_rate_source: 'unknown',
   };
-
-  return map[raw] ?? raw;
 }
 
 const SYMBOL_TO_CURRENCY: Record<string, string> = {
@@ -110,8 +121,19 @@ export function parseMoney(text: string): {
 
   return { amount: NaN, currency: null };
 }
-
-
+interface OrderCost {
+  subTotal?: number;
+  shipping?: number;
+  promotion?: number;
+  tax?: number;
+  total_before_tax?: number;
+  original_total?: number;        // 订单原币种最终总价
+  original_currency?: string;
+  payment_total?: number;         // 实际支付金额（可能是 USD）
+  payment_currency?: string;
+  usd_cost?: number;              // 统一 USD
+  exchange_rate?: number;
+}
 
 export function getOrderCost(doc: Document) {
   const container =
@@ -120,15 +142,17 @@ export function getOrderCost(doc: Document) {
 
   if (!container) return {};
 
-  const rows = Array.from(
-    container.querySelectorAll('.a-row.od-line-item-row, .a-row')
-  );
+  const rows = Array.from(container.querySelectorAll('.a-row'));
 
   const cost: Record<string, any> = {};
 
-  let firstCurrency: string | null = null;
+  let candidates: {
+    label: string;
+    amount: number;
+    currency?: string;
+  }[] = [];
 
-  rows.forEach(row => {
+  for (const row of rows) {
     const labelElem =
       row.querySelector('.od-line-item-row-label') ??
       row.querySelector('.a-column.a-span7');
@@ -137,128 +161,95 @@ export function getOrderCost(doc: Document) {
       row.querySelector('.od-line-item-row-content') ??
       row.querySelector('.a-column.a-span5');
 
-    if (!labelElem || !valueElem) return;
+    if (!labelElem || !valueElem) continue;
 
     const label = labelElem.textContent?.trim();
     const valueText = valueElem.textContent?.trim();
-    if (!label || !valueText) return;
+    if (!label || !valueText) continue;
 
     const { amount, currency } = parseMoney(valueText);
-    if (Number.isNaN(amount)) return;
+    if (Number.isNaN(amount)) continue;
 
-    if (!firstCurrency && currency) {
-      firstCurrency = currency;
-    }
-
-    // ---------- label 归一 ----------
     const normalized = label.toLowerCase();
 
-    if (normalized.includes('subtotal')) {
+    // ---- 基础字段 ----
+    if (normalized.includes('subtotal') && !normalized.includes('before')) {
       cost.subTotal = amount;
-      cost.original_currency ||= currency;
     }
 
-    if (normalized.includes('shipping') || normalized.includes('postage')) {
+    if (
+      normalized.includes('shipping') ||
+      normalized.includes('postage')
+    ) {
       cost.shipping = amount;
     }
 
     if (normalized.includes('promotion')) {
-      cost.promotion = amount;
+      cost.promotion = -Math.abs(amount);
     }
 
-    if (normalized.includes('vat') || normalized.includes('tax')) {
+    if (
+      normalized === 'vat:' ||
+      normalized.includes('estimated tax') ||
+      normalized.includes(' tax')
+    ) {
       cost.tax = amount;
     }
 
-    if (
-      normalized.includes('payment') &&
-      normalized.includes('total')
-    ) {
-      cost.payment_total = amount;
-      cost.payment_currency = currency;
+    if (normalized.includes('before') && normalized.includes('total')) {
+      cost.total_before_tax = amount;
     }
 
-    if (
-      normalized === 'total:' ||
-      (normalized.includes('total') && !normalized.includes('payment'))
-    ) {
-      cost.original_total = amount;
-      cost.original_currency ||= currency;
+    // ---- 收集候选 total ----
+    if (normalized.includes('total')) {
+      candidates.push({ label: normalized, amount, currency });
     }
-
-    if (normalized.includes('grand total')) {
-      if (!cost.payment_total) {
-        cost.payment_total = amount;
-        cost.payment_currency ||= currency;
-      }
-      cost.grand_total = amount;
-    }
-  });
-
-  // ---------- fallback ----------
-  if (!cost.payment_total && cost.original_total) {
-    cost.payment_total = cost.original_total;
-    cost.payment_currency = cost.original_currency;
   }
 
-  // ---------- exchange rate ----------
-  if (
-    cost.original_total &&
-    cost.payment_total &&
-    cost.original_currency &&
-    cost.payment_currency
-  ) {
-    cost.exchange_rate =
-      cost.payment_currency === cost.original_currency
-        ? 1
-        : Number(
-            (cost.payment_total / cost.original_total).toFixed(6)
-          );
+  // ---------- 决定最终 total（按优先级） ----------
+  const pick = (kw: string) =>
+    candidates.find(c => c.label.includes(kw));
+
+  const paymentTotal = pick('payment');
+  const grandTotal = pick('grand');
+  const plainTotal = pick('total:');
+
+  if (paymentTotal) {
+    cost.payment_total = paymentTotal.amount;
+    cost.payment_currency = paymentTotal.currency;
   }
 
-	// 1. original_cost
-	if (!cost.original_cost) {
-		cost.original_cost =
-			cost.original_total ??
-			cost.grand_total ??
-			0;
-	}
-	// === usd_cost ===
-	if (cost.payment_total) {
-		cost.usd_cost = cost.payment_total;
-	} else if (
-		cost.original_currency !== 'USD' &&
-		cost.original_cost > 0 &&
-		cost.exchange_rate > 0
-	) {
-		// 2️⃣ ACC 兜底
-		cost.usd_cost = Number(
-			(cost.original_cost * cost.exchange_rate).toFixed(2)
-		);
+  const finalOriginal =
+    grandTotal ?? plainTotal ?? paymentTotal;
 
-	} else if (cost.original_currency === 'USD') {
-		// 3️⃣ 美站
-		cost.usd_cost = cost.original_cost;
+  if (finalOriginal) {
+    cost.original_total = finalOriginal.amount;
+    cost.original_currency = finalOriginal.currency;
+  }
 
-	} else {
-		cost.usd_cost = 0;
-	}
+  // ---------- original_cost ----------
+  cost.original_cost =
+    cost.original_total ??
+    cost.subTotal ??
+    0;
 
-	// 3. exchange_rate
-	if (
-		cost.original_cost > 0 &&
-		cost.usd_cost > 0 &&
-		cost.original_currency !== 'USD'
-	) {
-		cost.exchange_rate = Number(
-			(cost.usd_cost / cost.original_cost).toFixed(6)
-		);
-	} else {
-		cost.exchange_rate = 1;
-	}
+  // ---------- USD / 汇率 ----------
+  if (cost.payment_currency && cost.payment_currency !== cost.original_currency) {
+    // ACC
+    cost.usd_cost = cost.payment_total;
+    cost.exchange_rate = Number(
+      (cost.payment_total / cost.original_cost).toFixed(6)
+    );
+  } else {
+    // 同币
+    cost.usd_cost =
+      cost.original_currency === 'USD'
+        ? cost.original_cost
+        : cost.original_cost;
+    cost.exchange_rate = 1;
+  }
 
-	// 4. total（如果你还想保留）
-	cost.total = cost.usd_cost || cost.original_cost;
+
   return cost;
 }
 
@@ -330,17 +321,19 @@ export async function getOrderBasicInfo(doc: Document) {
   const costWithUSD = await convertOrderCostToUSD(costInfo);
 
   return {
-    buy_order_number: "",
-    buy_order_date: "",
     subTotal: costWithUSD.subTotal ?? 0,
     tax: costWithUSD.tax ?? 0,
     shipping: costWithUSD.shipping ?? 0,
-    total: costWithUSD.total ?? 0,
+
+
     original_currency: costWithUSD.original_currency ?? "UNKNOWN",
     original_cost: costWithUSD.original_cost ?? 0,
-    usd_cost: costWithUSD.payment_total ?? 0,
+
+    usd_cost: costWithUSD.usd_cost ?? 0,
     exchange_rate: costWithUSD.exchange_rate ?? 1,
+
     address: getShippingAddress(doc),
     paymentMethod: getPaymentMethod(doc),
   };
 }
+

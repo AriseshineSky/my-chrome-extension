@@ -1,18 +1,8 @@
-import { getOrderCost, getShippingAddress } from "./order-details";
-import { getShipments } from './shipment'
-
+import {  getOrderBasicInfo } from "./order-details";
 import { User } from './content'
-
 import { fetchInfo, post, put } from "../services/api";
-import { getDateObj } from "./time-utils";
-import { RATES } from "./rate";
 
 export const ORDER_SELECTOR = "div.order-card, div#orderCard";
-const ORDER_NUMBER_SELECTOR = ':scope bdi[dir="ltr"], :scope span[dir="ltr"]';
-const PURCHASE_DATE_SELECTOR =
-	":scope .a-column.a-span4 .a-size-base, :scope .a-column.a-span4 > .a-row.a-size-base, :scope div.a-span3 span.a-size-base, :scope div.a-span3 div.a-size-base > span";
-const ORDER_TOTAL_COST_SELECTOR =
-	":scope div.order-header div.a-span2 span.aok-break-word";
 
 const NEXT_PAGE_SELECTOR = "ul.a-pagination > li.a-last > a";
 
@@ -30,7 +20,6 @@ export async function getOrders(country: string, user: User) {
 		} catch (e) {
 			console.log(e)
 		}
-
 	}
 
 	await saveOrders(user, orders)
@@ -71,28 +60,33 @@ function goToNextPage() {
 	window.location.href = fullUrl;
 }
 
-const ORDER_URL_SELECTOR = "div.a-row .yohtmlc-order-details-link, div.a-row > .yohtmlc-order-level-connections a";
+// const ORDER_URL_SELECTOR = "div.a-row .yohtmlc-order-details-link, div.a-row > .yohtmlc-order-level-connections a";
+const ORDER_URL_SELECTOR = `
+  a[href*="/gp/css/order-details"],
+  a[data-savepage-href*="/gp/css/order-details"],
+  a[href*="order-details?orderID="],
+  .yohtmlc-order-details-link,
+  .yohtmlc-order-level-connections a
+`;
 
-function getOrderDetailUrl(divOrder) {
-	const orderDetailUrl = divOrder.querySelector(ORDER_URL_SELECTOR);
-	return orderDetailUrl?.getAttribute("href").replace("css", "your-account");
+function getOrderDetailUrl(divOrder: Element): string {
+  const link = divOrder.querySelector(ORDER_URL_SELECTOR);
+  if (!link) {
+    throw new Error("Order detail link not found");
+  }
+
+  const href =
+    link.getAttribute("data-savepage-href") ||
+    link.getAttribute("href");
+
+  if (!href) {
+    throw new Error("Order detail href missing");
+  }
+
+  return href.replace("/gp/css/", "/gp/your-account/");
 }
 
-function getAmountFromStr(orderTotalCostStr: string, country: string, rate = null): String {
-	let match: RegExpMatchArray | null = null;
-	match = orderTotalCostStr.match(/^US\$(\d+(\.\d+)?)/)
-	if (match) {
-		return match[1]
-	}
-	match = orderTotalCostStr.match(/^\$(\d+(\.+d)?)/)
-	if (match) {
-		return match[1]
-	}
-	if (rate === null) {
-		rate = RATES[country];
-	}
-	return (Number(orderTotalCostStr.replace(/[$£]/g, "")) * rate).toFixed(2);
-}
+
 
 export function extractOrderInfo(root: Element) {
   const labelOrder = Array.from(root.querySelectorAll("span"))
@@ -123,31 +117,28 @@ export function extractOrderInfo(root: Element) {
   };
 }
 
+type FetchDoc = (url: string) => Promise<Document>;
 
-async function getOrderInfo(divOrder: Element, country: String) {
+export async function getOrderInfo(divOrder: Element, country: String, fetchDoc: FetchDoc = fetchInfo) {
   const {
     orderNumber,
     orderDate: orderDateStr,
-		totalCost: orderTotalCostStr,
     shipTo,
-    placedBy
   } = extractOrderInfo(divOrder)
+
 	const orderDetailUrl = getOrderDetailUrl(divOrder)
-	const orderBasicDoc = await fetchInfo(orderDetailUrl)
-	const orderBasicInfo = await getOrderBasicInfo(orderBasicDoc, country);
-	const rate = orderBasicInfo.cost.rate;
-	const orderTotalCost = getAmountFromStr(orderTotalCostStr, country, rate);
+	const orderBasicDoc = await fetchDoc(orderDetailUrl)
+	const orderBasicInfo = await getOrderBasicInfo(orderBasicDoc);
 	const orderDateObj = new Date(orderDateStr);
   const orderDateISO = isNaN(orderDateObj.getTime())
     ? null
     : orderDateObj.toISOString().split("T")[0];
 
 	const orderInfo = {
+		orderNumber: orderNumber,
 		buy_order_number: orderNumber,
-    buy_cost: orderTotalCost,
     buy_order_date: orderDateISO,
     ship_to: shipTo,
-    placed_by: placedBy,
     ...orderBasicInfo,
   };
 
@@ -170,36 +161,7 @@ export function extractOrderSummary(doc) {
   return result;
 }
 
-async function getOrderBasicInfo(doc, country) {
-	const cost = getOrderCost(
-		doc.body.textContent.replace(/\s+/g, " ").trim(),
-		country,
-	);
-	const rate = cost.rate;
-	const address = getShippingAddress(doc);
-	const shipments = await getShipments(doc, country, rate);
-
-	return {
-		cost,
-		address,
-		shipments,
-	};
-}
-
-function getOrdersFromLocal(user) {
-	const users = JSON.parse(localStorage.getItem("users") ?? "{}");
-	return users[user.email]?.orders ?? {};
-}
-
-function saveOrdersToLocal(user, orders) {
-	const users = JSON.parse(localStorage.getItem("users") ?? "{}");
-	users[user.email] ??= {};
-	users[user.email].orders = orders;
-	localStorage.setItem("users", JSON.stringify(users));
-}
-
 export async function saveOrders(user, orders) {
-	const localOrders = getOrdersFromLocal(user)
 	const newOrders = [];
 
 	for (let orderNumber in orders) {
@@ -207,17 +169,14 @@ export async function saveOrders(user, orders) {
 		newOrder.buy_account = user.email
 
 		newOrders.push(newOrder)
-		localOrders[orderNumber] = orders[orderNumber];
 
 		if (orderNumber in localOrders) {
 			await put(orders[orderNumber])
 		} else {
 			newOrders.push(newOrder)
-			localOrders[orderNumber] = orders[orderNumber];
 		}
 	}
 	await post(newOrders);
-	// saveOrdersToLocal(user, localOrders);
 }
 
 

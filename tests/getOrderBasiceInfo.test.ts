@@ -8,12 +8,12 @@ vi.mock("../content/money-utils", () => ({
     return num * (rate || 1)
   }),
 }));
+
 const EXPECTED_ORDERS = {
   "111-6784099-6345037.html": {
     subTotal: 4.48,
     tax: 0.36,
     shipping: 0,
-    total: 4.84,
     original_currency: "USD",
     original_cost: 4.84,
     usd_cost: 4.84,
@@ -21,11 +21,11 @@ const EXPECTED_ORDERS = {
     address: "JOYZ   1140056, 2101 E TERRA LNO FALLON, MO 63366-4513, United States",
     paymentMethod: "AMEX ending in 2044",
   },
+
   "112-5975653-8865058.html": {
     subTotal: 25.98,
     tax: 2.07,
     shipping: 0,
-    total: 28.05,
     original_currency: "USD",
     original_cost: 28.05,
     usd_cost: 28.05,
@@ -34,27 +34,21 @@ const EXPECTED_ORDERS = {
     paymentMethod: "AMEX ending in 2077",
   },
   "206-2592338-8891513.html": {
-    buy_order_number: '',
-		buy_order_date: '',
 		subTotal: 16.62,
 		tax: 3.32,
 		shipping: 0,
-		total: 19.94,
 		original_currency: 'GBP',
 		original_cost: 19.94,
-		usd_cost: 19.94,
-		exchange_rate: 1,
+		usd_cost: 26.72,
+		exchange_rate: 1.34,
 		address: 'Amber Chiu, BIRD IN EYE FARMHOUSE BIRD IN EYE HILL8773969FRAMFIELD TN22 5HA, United Kingdom',
 		paymentMethod: "Visa •••• 9618"
-
   },
+
 	"202-2103857-5887544.html": {
-		buy_order_number: '',
-		buy_order_date: '',
 		subTotal: 14.16,
 		tax: 2.83,
 		shipping: 0,
-		total: 23.39,
 		original_currency: 'GBP',
 		original_cost: 16.99,
 		usd_cost: 23.39,
@@ -63,12 +57,9 @@ const EXPECTED_ORDERS = {
 		paymentMethod: 'AMEX ending in 1038'
 	},
 	"205-1272725-0305915.html": {
-		buy_order_number: '',
-		buy_order_date: '',
 		subTotal: 26.8,
 		tax: 0,
 		shipping: 0,
-		total: 27.44,
 		original_currency: 'USD',
 		original_cost: 27.44,
 		usd_cost: 27.44,
@@ -92,7 +83,6 @@ describe("getOrderBasicInfo", () => {
       expect(info.subTotal).toBeCloseTo(expected.subTotal, 2);
       expect(info.tax).toBeCloseTo(expected.tax, 2);
       expect(info.shipping).toBeCloseTo(expected.shipping, 2);
-      expect(info.total).toBeCloseTo(expected.total, 2);
 
       expect(info.original_currency).toBe(expected.original_currency);
       expect(info.original_cost).toBeCloseTo(expected.original_cost, 2);

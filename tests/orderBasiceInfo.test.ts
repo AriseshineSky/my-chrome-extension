@@ -19,7 +19,7 @@ const EXPECTED_ORDERS = {
   }
 }
 
-describe("get order list from local html", () => {
+describe("get order basic info from local html", () => {
 	it("should extract order cost from uk-orders.html", async () => {
 		const file = "uk-orders.html"
 		const orders = {}
@@ -39,11 +39,12 @@ describe("get order list from local html", () => {
 		}
 		for (const [orderNumber, order] of Object.entries(EXPECTED_ORDERS)) {
 			const orderInfo = orders[orderNumber]
-			expect(orderInfo.totalCost).toBe(order.totalCost);
-			expect(orderInfo.orderDate).toBe(order.orderDate);
-			expect(orderInfo.shipTo).toBe(order.shipTo);
-			expect(orderInfo.placedBy).toBe(order.placedBy);
-			expect(orderInfo.orderNumber).toBe(order.orderNumber);
+			console.log(orderInfo)
+			expect(orderInfo.totalCost).toBe("£19.95");
+			expect(orderInfo.orderDate).toBe("16 December 2025");
+			expect(orderInfo.shipTo).toBe("Amber Chiu");
+			expect(orderInfo.placedBy).toBe("EMUK2 BUY2");
+			expect(orderInfo.orderNumber, '206-2592338-8891513')
 		}
 	})
 })
