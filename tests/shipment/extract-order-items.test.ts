@@ -20,10 +20,8 @@ describe("extractOrderItems", () => {
 
     const values = Object.values(items);
     expect(values.length).toBeGreaterThan(0);
-		console.log(values)
 
     for (const item of values) {
-			console.log(item)
       expect(item).toHaveProperty("asin");
       expect(item.asin).toMatch(/^[A-Z0-9]{8,}$/);
 
