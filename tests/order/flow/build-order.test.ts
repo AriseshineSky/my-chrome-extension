@@ -55,8 +55,7 @@ describe("buildOrder", () => {
 			original_total: 4.84,
 			original_currency: "USD",
 			original_cost: 4.84,
-			payment_currency: "USD",
-			payment_total: 4.84,
+			final_paid_usd: 4.84,
     });
 
     (extractShippingAddress as any).mockReturnValue(
@@ -103,9 +102,10 @@ describe("buildOrder", () => {
 					original_currency: 'USD',
 					original_cost: 4.84,
 					usd_cost: 4.84,
+					final_paid_usd: 4.84,
+				 "payment_currency": undefined,
+				 "payment_total": undefined,
 					exchange_rate: 1,
-					payment_currency: 'USD',
-					payment_total: 4.84
 				},
 				address: '2101 E TERRA LN, O FALLON, MO',
 				paymentMethod: 'AMEX ending in 2044',
@@ -156,6 +156,7 @@ describe("buildOrder", () => {
 			"payment_total": 7.56,
 			"shipping": 0,
 			"subTotal": 5.49,
+			final_paid_usd: 7.56,
     });
 
     (extractShippingAddress as any).mockReturnValue(
@@ -205,7 +206,8 @@ describe("buildOrder", () => {
 				usd_cost: 7.56,
 				exchange_rate: 1.377049,
 				payment_currency: 'USD',
-				payment_total: 7.56
+				payment_total: 7.56,
+				final_paid_usd: 7.56,
 			},
 
 			shipments: {

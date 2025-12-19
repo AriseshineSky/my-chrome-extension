@@ -47,8 +47,7 @@ export function extractOrderCost(doc: Document) {
       cost.original_currency = currency;
 
       // ⭐⭐ 关键：ACC 场景下，Grand Total 就是 Payment Total
-      // if (currency === "USD" && hasExchangeRateHint) {
-      if (currency === "USD") {
+      if (currency === "USD" && hasExchangeRateHint) {
         cost.payment_total = amount;
         cost.payment_currency = currency;
       }
@@ -98,6 +97,21 @@ export function extractOrderCost(doc: Document) {
       cost.original_currency = currency;
     }
   }
+
+	if (cost.payment_currency === "USD" && cost.payment_total > 0) {
+		cost.final_paid_usd = cost.payment_total
+	}
+	else if (cost.original_currency === "USD") {
+		cost.final_paid_usd = cost.original_total
+	}
+	else if (cost.original_currency !== "USD") {
+		cost.final_paid_usd = cost.original_total * cost.exchange_rate
+	}
+	else {
+		cost.final_paid_usd = 0
+	}
+
+
 
   /* ---------- original_cost ---------- */
   cost.original_cost =

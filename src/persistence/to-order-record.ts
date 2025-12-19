@@ -1,25 +1,39 @@
-export function toOrderRecord(order: & { buy_account: string }) {
+// src/persistence/to-order-record.ts
+import { Order } from "@/domain/Order";
+
+export function toOrderRecord(
+  order: Order,
+  userEmail: string,
+) {
+  const cost = order.cost;
+
   return {
-    buy_account: order.buy_account,
+    user_email: userEmail,
+
     order_number: order.orderNumber,
-    buy_order_date: order.buyOrderDate,
-    ship_to: order.shipTo,
+    buy_order_date: order.buyOrderDate ?? null,
+    ship_to: order.shipTo ?? null,
 
-    sub_total: order.subTotal,
-    tax: order.tax,
-    shipping: order.shipping,
-    total: order.total,
+    address: order.address ?? null,
+    payment_method: order.paymentMethod ?? null,
 
-    original_currency: order.originalCurrency,
-    original_cost: order.originalCost,
-    usd_cost: order.usdCost,
-    exchange_rate: order.exchangeRate,
-    exchange_rate_source: order.exchangeRateSource,
+    sub_total: cost.subTotal ?? 0,
+    shipping: cost.shipping ?? 0,
+    tax: cost.tax ?? 0,
 
-    address: order.address,
-    payment_method: order.paymentMethod,
+    original_currency: cost.original_currency,
+    original_cost: cost.original_cost,
 
-    last_checked_at: new Date().toISOString(),
+    usd_cost: cost.usd_cost,
+    final_paid_usd: cost.final_paid_usd ?? cost.usd_cost,
+
+    exchange_rate: cost.exchange_rate,
+
+    // ✅ optional fields：不存在就不传
+    payment_currency: cost.payment_currency,
+    payment_total: cost.payment_total,
+
+    shipments: order.shipments,
   };
 }
 
