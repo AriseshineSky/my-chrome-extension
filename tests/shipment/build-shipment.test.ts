@@ -13,7 +13,7 @@ vi.mock("@/shipment/extract/extract-shipment-status", () => ({
 
 vi.mock("@/shipment/extract/extract-order-items", () => ({
   extractOrderItems: vi.fn(() => ({
-    BW5XJjGqd: {
+    B06XYNHFF2: {
 			asin: 'B06XYNHFF2',
 			quantity: 1,
 			originalPrice: 4.48,
@@ -43,7 +43,7 @@ describe("buildShipment", () => {
       shipmentId: "BW5XJjGqd",
       status: "Delivered",
       items: {
-        BW5XJjGqd: {
+        B06XYNHFF2: {
 					asin: 'B06XYNHFF2',
 					quantity: 1,
 					originalPrice: 4.48,

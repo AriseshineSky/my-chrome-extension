@@ -1,4 +1,82 @@
 import { parseMoney } from "../../money/parse-money";
+import { RATES } from "../../money/rates";
+
+async function convertOrderCostToUSD(
+  cost: Record<string, any>
+) {
+  const originalCurrency = cost.original_currency;
+  const originalCost = cost.original_cost;
+
+  // ---------- Case 1: 页面提供了 USD 支付金额（ACC / 跨币） ----------
+  if (
+    cost.payment_total &&
+    cost.payment_currency === 'USD' &&
+    originalCost > 0
+  ) {
+    const rate =
+      originalCurrency === 'USD'
+        ? 1
+        : Number((cost.payment_total / originalCost).toFixed(6));
+
+    return {
+      ...cost,
+      usd_cost: cost.payment_total,
+      exchange_rate: rate,
+      exchange_rate_source: 'page',
+    };
+  }
+
+  // ---------- Case 2: 原币就是 USD ----------
+  if (originalCurrency === 'USD' && originalCost > 0) {
+    return {
+      ...cost,
+      usd_cost: originalCost,
+      exchange_rate: 1,
+      exchange_rate_source: 'identity',
+    };
+  }
+
+  // ---------- Case 3: 使用币种默认汇率 ----------
+  if (originalCurrency && originalCost > 0) {
+    const rate = RATES[originalCurrency];
+
+    if (rate) {
+      return {
+        ...cost,
+        usd_cost: Number((originalCost * rate).toFixed(2)),
+        exchange_rate: rate,
+        exchange_rate_source: 'default',
+      };
+    }
+  }
+
+  return {
+    ...cost,
+    usd_cost: 0,
+    exchange_rate: 1,
+    exchange_rate_source: 'unknown',
+  };
+}
+
+export async function getOrderBasicInfo(doc: Document) {
+  const costInfo = extractOrderCost(doc);
+  const costWithUSD = await convertOrderCostToUSD(costInfo);
+
+  return {
+    subTotal: costWithUSD.subTotal ?? 0,
+    tax: costWithUSD.tax ?? 0,
+    shipping: costWithUSD.shipping ?? 0,
+
+
+    original_currency: costWithUSD.original_currency ?? "UNKNOWN",
+    original_cost: costWithUSD.original_cost ?? 0,
+
+    usd_cost: costWithUSD.usd_cost ?? 0,
+    exchange_rate: costWithUSD.exchange_rate ?? 1,
+  };
+}
+
+
 export function extractOrderCost(doc: Document) {
   const container =
     doc.querySelector('[data-component="chargeSummary"]') ??
@@ -116,4 +194,3 @@ export function extractOrderCost(doc: Document) {
 
   return cost;
 }
-

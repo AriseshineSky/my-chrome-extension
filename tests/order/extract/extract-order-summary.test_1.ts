@@ -32,7 +32,6 @@ describe("extractOrderSummary (UK orders list)", () => {
         expect(summary.orderDate.length).toBeGreaterThan(0);
       }
 
-      // 🧪 shipTo / placedBy
       if (summary.shipTo) {
         expect(summary.shipTo.length).toBeGreaterThan(0);
       }
