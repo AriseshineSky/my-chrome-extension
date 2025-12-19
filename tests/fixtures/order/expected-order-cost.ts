@@ -1,28 +1,52 @@
-export const EXPECTED_TRACK_INFO: Record<
-  string,
-  { order: string | null; carrier: string | null }
-> = {
+export const EXPECTED_ORDER_INFO = {
   "order/111-6784099-6345037.html": {
 		subTotal: 4.48,
 		shipping: 0,
 		tax: 0.36,
-		total_before_tax: 4.48,
 		original_total: 4.84,
-		original_currency: 'USD',
+		original_currency: "USD",
 		original_cost: 4.84,
-		usd_cost: 4.84,
-		exchange_rate: 1
   },
-  "order/Ug9qr1K6K.html": {
-    order: "UK2943871131",
-    carrier: "Amazon",
+  "order/202-9691085-8778754.html": {
+    "original_cost": 5.49,
+    "original_currency": "GBP",
+    "original_total": 5.49,
+    "payment_currency": "USD",
+    "payment_total": 7.56,
+    "shipping": 0,
+    "subTotal": 5.49,
   },
-  "order/UJ9krSmsZ.html": {
-    order: "UK3704754323",
-    carrier: "Amazon",
+  "order/202-2103857-5887544.html": {
+    "original_cost": 16.99,
+    "original_currency": "GBP",
+    "original_total": 16.99,
+    "payment_currency": "USD",
+    "payment_total": 23.39,
+    "shipping": 0,
+    "subTotal": 14.16,
+    "tax": 2.83,
+    "total_before_tax": 14.16,
   },
-  "order/UXfxScdLW.html": {
-    order: "UK2959311818",
-    carrier: "Amazon",
+  "order/202-6344826-2669928.html": {
+    "original_cost": 83.8,
+    "original_currency": "GBP",
+    "original_total": 83.8,
+    "payment_currency": "USD",
+    "payment_total": 114.92,
+    "shipping": 0,
+    "subTotal": 69.84,
+    "tax": 13.96,
+    "total_before_tax": 69.84,
+  },
+  "order/205-1272725-0305915.html": {
+     "original_cost": 27.44,
+     "original_currency": "USD",
+     "original_total": 27.44,
+     "payment_currency": "USD",
+     "payment_total": 27.44,
+     "shipping": 0,
+     "subTotal": 26.8,
+     "tax": 0,
+     "total_before_tax": 26.8,
   },
 };
