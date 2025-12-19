@@ -1,4 +1,4 @@
-const BASE_URL = "https://fulfill.everymarket.com/api/v2/amazon_orders";
+const BASE_URL = "https://fulfill.everymarket.com/api/v3/amazon_orders";
 const API_TOKEN = "your_secret_token_here";
 type ApiResult<T> =
   | { ok: true; data: T }

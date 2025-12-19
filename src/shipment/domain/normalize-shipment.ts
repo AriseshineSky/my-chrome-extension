@@ -19,8 +19,9 @@ export function normalizeShipment(
 
     tracking: raw.tracking?.tracking ?? null,
     carrier: raw.tracking?.carrier ?? null,
+		items: Object.values(raw.items ?? {} as Record<string, any>)
+		  .map(item => normalizeShipmentItem(item as Record<string, any>))
 
-    items: Object.values(raw.items ?? {}).map(normalizeShipmentItem),
   };
 }
 

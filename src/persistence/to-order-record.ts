@@ -15,20 +15,18 @@ export function toOrderRecord(
     address: order.address ?? null,
     payment_method: order.paymentMethod ?? null,
 
-    sub_total: cost.subTotal ?? 0,
-    shipping: cost.shipping ?? 0,
-    tax: cost.tax ?? 0,
-
-    original_currency: cost.original_currency,
-    original_cost: cost.original_cost,
-
-    usd_cost: cost.usd_cost,
-    final_paid_usd: cost.final_paid_usd ?? cost.usd_cost,
-
-    exchange_rate: cost.exchange_rate,
-
-    payment_currency: cost.payment_currency,
-    payment_total: cost.payment_total,
+		cost: {
+			sub_total: cost.subTotal ?? 0,
+			shipping: cost.shipping ?? 0,
+			tax: cost.tax ?? 0,
+			original_currency: cost.original_currency,
+			original_cost: cost.original_cost,
+			usd_cost: cost.usd_cost,
+			final_paid_usd: cost.final_paid_usd ?? cost.usd_cost,
+			exchange_rate: cost.exchange_rate,
+			payment_currency: cost.payment_currency,
+			payment_total: cost.payment_total,
+		},
 
     shipments: Object.values(order.shipments ?? []).map(normalizeShipment)
   };

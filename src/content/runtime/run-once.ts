@@ -5,6 +5,12 @@ import { isTaskRunning, refreshTaskTTL, clearTask } from "./task";
 import { getCurrentAmazonCountry, isLogged } from "./env";
 import { loadUser } from "./user";
 
+const SOURCES = {
+	"us": "AMZ_US",
+	"uk": "AMZ_UK",
+	"de": "AMZ_DE"
+}
+
 function ensureDomReady(): Promise<void> {
   if (document.readyState === "interactive" || document.readyState === "complete") {
     return Promise.resolve();
@@ -31,6 +37,11 @@ export async function runOnce() {
     clearTask();
     return;
   }
+	if (country in SOURCES) {
+		user.source = SOURCES[country as keyof typeof SOURCES];
+	} else {
+		user.source = 'us'; // 默认值
+	}
 
   sendClickLog(user.email);
 

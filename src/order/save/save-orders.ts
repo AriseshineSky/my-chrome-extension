@@ -10,7 +10,7 @@ export async function saveOrders(
   if (!orders.length) return;
 
   const records = orders.map(order =>
-    toOrderRecord(order, user.email),
+    toOrderRecord(order),
   );
 
   await post({orders: records, user_email: user.email, source: user.source});

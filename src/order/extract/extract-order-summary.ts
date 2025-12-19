@@ -6,14 +6,14 @@ export function extractOrderSummary(root: Element) {
   const orderNumber = rowOrder?.textContent?.match(/\b\d{3}-\d{7}-\d{7}\b/)?.[0] ?? null;
 
   const labelDate = Array.from(root.querySelectorAll(".a-column"))
-    .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.trim() === "Order placed");
+    .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.toLowerCase().trim() === "order placed");
   let orderDate = labelDate?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
 
   if (!orderDate) {
     const li = root.querySelector("li.order-header__header-list-item");
     if (li) {
       const label = li.querySelector("span.a-color-secondary.a-text-caps");
-      if (label?.textContent.trim() === "Order placed") {
+      if (label?.textContent.toLowerCase().trim() === "order placed") {
         const dateSpan = li.querySelector("span.a-size-base.a-color-secondary.aok-break-word");
         orderDate = dateSpan?.textContent.trim() ?? null;
       }

@@ -4,6 +4,7 @@ import { fetchInfo } from "../../services/api";
 export interface User {
   name: string;
   email: string;
+	source?: string;
 }
 
 function getFullUrl(path: string) {
