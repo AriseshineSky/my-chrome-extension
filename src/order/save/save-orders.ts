@@ -4,7 +4,7 @@ import { toOrderRecord } from "../../persistence/to-order-record";
 import { Order } from "@/domain/Order";
 
 export async function saveOrders(
-  user: { email: string },
+  user: { email: string, source: string },
   orders: Order[],
 ) {
   if (!orders.length) return;
@@ -13,6 +13,6 @@ export async function saveOrders(
     toOrderRecord(order, user.email),
   );
 
-  await post(records);
+  await post({orders: records, user_email: user.email, source: user.source});
 }
 

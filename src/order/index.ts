@@ -4,14 +4,20 @@ import { saveOrders } from "./save/save-orders";
 import { goToNextPage } from "./list/pagination";
 import { isOrdersExpired } from "./domain/is-order-expired";
 
-export async function syncOrders(user) {
-  const orders = await collectOrdersOnPage();
-  await saveOrders(user, orders);
+import { Order } from "@/domain/Order";
 
-  if (orders && orders.length > 0 && !isOrdersExpired(orders)) {
-    goToNextPage();
-    return false;
-  }
-  return true;
+export async function syncOrders(user: any) {
+  const orders = await collectOrdersOnPage();
+	const validOrders = orders.filter(
+		(o): o is Order => o !== null,
+	);
+  await saveOrders(user, validOrders);
+	if (
+		validOrders.length > 0 &&
+		!isOrdersExpired(validOrders)
+	) {
+		goToNextPage();
+		return false;
+	}
 }
 

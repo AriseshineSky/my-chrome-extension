@@ -25,8 +25,9 @@ export async function buildOrder(
     ...summary,
     cost,
     address,
-    paymentMethod,
+    paymentMethod: paymentMethod ?? undefined,
     shipments,
+		buyOrderDate: rawCost.buyOrderDate ?? null,
   };
 }
 

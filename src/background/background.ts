@@ -1,4 +1,4 @@
-function handleGetOrders(sendResponse) {
+function handleGetOrders(sendResponse: (response?: any) => void): void {
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		if (tabs.length === 0) {
 			console.error("No active tab found.");
@@ -11,14 +11,20 @@ function handleGetOrders(sendResponse) {
 	});
 }
 
-function sendMessageToContentScript(tabId, message, sendResponse) {
+function sendMessageToContentScript(
+  tabId: number,
+  message: any,
+  sendResponse?: (response?: any) => void,
+): void {
 	chrome.tabs.sendMessage(tabId, message, (response) => {
-		sendResponse(response);
+		if (sendResponse) {
+			sendResponse(response);
+		}
 	});
 }
 
-function handleUpdateButton(sendResponse) {
-	sendResponse({ active: true });
+function handleUpdateButton(sendResponse: (response?: any) => void): void {
+  sendResponse?.({ success: true });
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

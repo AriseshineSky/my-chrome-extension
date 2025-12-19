@@ -5,5 +5,6 @@ export interface OrderItem {
   originalPrice: number;
   originalCurrency: string | null;
   originalCost: number;
+	priceText: string;
 }
 

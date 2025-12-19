@@ -1,15 +1,13 @@
 // src/persistence/to-order-record.ts
 import { Order } from "@/domain/Order";
+import { normalizeShipment } from "@/shipment/domain/normalize-shipment";
 
 export function toOrderRecord(
   order: Order,
-  userEmail: string,
 ) {
   const cost = order.cost;
 
   return {
-    user_email: userEmail,
-
     order_number: order.orderNumber,
     buy_order_date: order.buyOrderDate ?? null,
     ship_to: order.shipTo ?? null,
@@ -29,11 +27,10 @@ export function toOrderRecord(
 
     exchange_rate: cost.exchange_rate,
 
-    // ✅ optional fields：不存在就不传
     payment_currency: cost.payment_currency,
     payment_total: cost.payment_total,
 
-    shipments: order.shipments,
+    shipments: Object.values(order.shipments ?? []).map(normalizeShipment)
   };
 }
 

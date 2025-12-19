@@ -1,10 +1,11 @@
 // order/flow/get-order-basic-info.ts
 import { extractOrderCost } from "../extract/extract-order-cost";
 import { normalizeOrderCostToUSD } from "../../money/normalize-order-cost";
+import { NormalizedCost } from "@/domain/NormalizedCost";
 
 export function getOrderBasicInfo(doc: Document) {
   const rawCost = extractOrderCost(doc);
-  const normalized = normalizeOrderCostToUSD(rawCost);
+  const normalized: NormalizedCost = normalizeOrderCostToUSD(rawCost);
 
   return {
     subTotal: normalized.subTotal ?? 0,

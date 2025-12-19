@@ -15,8 +15,8 @@ export async function fetchInfo(url: string): Promise<Document> {
   return new DOMParser().parseFromString(htmlText, "text/html");
 }
 
-export function sleep(ms) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 const headers = new Headers({ "Content-Type": "application/json" });
@@ -54,13 +54,13 @@ async function retryFetch<T>(
   return { ok: false, error: "retry_exhausted" };
 }
 
-export async function post(orders: any[]) {
+export async function post(payload: any) {
   const result = await retryFetch(
     `${BASE_URL}/batch_create?token=${API_TOKEN}`,
     {
       method: "POST",
       headers,
-      body: JSON.stringify({ amazon_orders: orders }),
+      body: JSON.stringify(payload),
     },
   );
 
@@ -68,10 +68,10 @@ export async function post(orders: any[]) {
     source: "amazon-order",
     level: result.ok ? "info" : "error",
     message: result.ok
-      ? `Synced ${orders.length} orders`
+      ? `Synced orders`
       : `Sync failed`,
     metadata: {
-      order_count: orders.length,
+      order_count: payload.orders.length,
       result,
     },
   });

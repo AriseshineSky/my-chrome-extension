@@ -33,7 +33,7 @@ export default defineConfig({
 			input: {
 				main: "./index.html",
 				background: "./src/background/background.ts",
-				content: "./src/content/content-entry.ts",
+				content: "./src/content-entry.ts",
 			},
 			output: {
 				entryFileNames: '[name].js',

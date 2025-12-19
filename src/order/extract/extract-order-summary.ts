@@ -7,7 +7,18 @@ export function extractOrderSummary(root: Element) {
 
   const labelDate = Array.from(root.querySelectorAll(".a-column"))
     .find(col => col.querySelector(".a-row.a-color-secondary")?.textContent.trim() === "Order placed");
-  const orderDate = labelDate?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
+  let orderDate = labelDate?.querySelector(".a-row.a-size-base")?.textContent.trim() ?? null;
+
+  if (!orderDate) {
+    const li = root.querySelector("li.order-header__header-list-item");
+    if (li) {
+      const label = li.querySelector("span.a-color-secondary.a-text-caps");
+      if (label?.textContent.trim() === "Order placed") {
+        const dateSpan = li.querySelector("span.a-size-base.a-color-secondary.aok-break-word");
+        orderDate = dateSpan?.textContent.trim() ?? null;
+      }
+    }
+  }
 
   const labelShipTo = root.querySelector(".a-column .a-popover-preload .a-text-bold");
   const shipTo = labelShipTo?.textContent.trim() ?? null;
@@ -16,7 +27,7 @@ export function extractOrderSummary(root: Element) {
   const placedBy = labelPlacedBy?.textContent.trim() ?? null;
 
   return {
-    orderNumber,
+    orderNumber: orderNumber ?? "",
     orderDate,
     shipTo,
     placedBy

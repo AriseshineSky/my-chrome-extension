@@ -32,7 +32,7 @@ export function normalizeOrderCost(raw: Record<string, any>) {
     finalPaidUSD = Number((originalCost * exchangeRate).toFixed(2));
   }
 
-  return {
+  const cost = {
     subTotal: raw.subTotal ?? 0,
     shipping: raw.shipping ?? 0,
     tax: raw.tax ?? 0,
@@ -40,15 +40,13 @@ export function normalizeOrderCost(raw: Record<string, any>) {
     original_currency: originalCurrency,
     original_cost: originalCost,
 
-    // ✅ 统一财务口径
     final_paid_usd: finalPaidUSD,
-
-    // 保留辅助字段（调试 / 审计用）
     usd_cost: finalPaidUSD,
     exchange_rate: exchangeRate,
 
     payment_currency: raw.payment_currency,
     payment_total: raw.payment_total,
   };
+	return cost;
 }
 
