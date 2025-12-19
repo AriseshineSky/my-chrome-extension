@@ -27,6 +27,12 @@ export function extractOrderItems(
 }
 
 /* ---------------- private helpers ---------------- */
+const SYMBOL_TO_CURRENCY: Record<string, string> = {
+  "$": "USD",
+  "£": "GBP",
+  "€": "EUR",
+};
+
 
 function extractOrderItem(
   elem: Element,
@@ -78,7 +84,19 @@ function extractOriginalAmount(priceText: string): number {
 }
 
 function extractCurrency(priceText: string): string | null {
-  const match = priceText.match(/^([^\d\s]+)/);
-  return match?.[1] ?? null;
-}
+  if (!priceText) return null;
 
+  // 1️⃣ ISO code：USD 12.34
+  const isoMatch = priceText.match(/\b([A-Z]{3})\b/);
+  if (isoMatch) {
+    return isoMatch[1];
+  }
+
+  // 2️⃣ Symbol：$12.34 / £12.34 / €12.34
+  const symbolMatch = priceText.match(/^([£$€])/);
+  if (symbolMatch) {
+    return SYMBOL_TO_CURRENCY[symbolMatch[1]] ?? null;
+  }
+
+  return null;
+}

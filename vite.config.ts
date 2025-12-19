@@ -15,7 +15,7 @@ export default defineConfig({
 		viteStaticCopy({
 			targets: [
 				{
-					src: "public/manifest.json",
+					src: "src/manifest.json",
 					dest: ".",
 				},
 			],
@@ -32,8 +32,8 @@ export default defineConfig({
 		rollupOptions: {
 			input: {
 				main: "./index.html",
-				background: "./background/background.ts",
-				content: "./content/content-entry.ts",
+				background: "./src/background/background.ts",
+				content: "./src/content/content-entry.ts",
 			},
 			output: {
 				entryFileNames: '[name].js',

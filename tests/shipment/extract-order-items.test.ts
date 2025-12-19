@@ -23,14 +23,15 @@ describe("extractOrderItems", () => {
 		console.log(values)
 
     for (const item of values) {
+			console.log(item)
       expect(item).toHaveProperty("asin");
       expect(item.asin).toMatch(/^[A-Z0-9]{8,}$/);
 
       expect(item).toHaveProperty("quantity");
       expect(item.quantity).toBeGreaterThanOrEqual(1);
 
-      expect(item).toHaveProperty("originalAmount");
-      expect(typeof item.originalAmount).toBe("number");
+      expect(item).toHaveProperty("originalPrice");
+      expect(typeof item.originalPrice).toBe("number");
 
       expect(item).toHaveProperty("originalCurrency");
       expect(
