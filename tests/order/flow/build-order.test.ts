@@ -55,6 +55,8 @@ describe("buildOrder", () => {
 			original_total: 4.84,
 			original_currency: "USD",
 			original_cost: 4.84,
+			payment_currency: "USD",
+			payment_total: 4.84,
     });
 
     (extractShippingAddress as any).mockReturnValue(
@@ -88,7 +90,6 @@ describe("buildOrder", () => {
 
     // 🚀 调用被测函数
     const order = await buildOrder(fakeOrderCard);
-		console.log(order)
 
     expect(order).toEqual(
 			{
@@ -99,9 +100,12 @@ describe("buildOrder", () => {
 					subTotal: 4.48,
 					shipping: 0,
 					tax: 0.36,
-					original_total: 4.84,
 					original_currency: 'USD',
-					original_cost: 4.84
+					original_cost: 4.84,
+					usd_cost: 4.84,
+					exchange_rate: 1,
+					payment_currency: 'USD',
+					payment_total: 4.84
 				},
 				address: '2101 E TERRA LN, O FALLON, MO',
 				paymentMethod: 'AMEX ending in 2044',
@@ -185,7 +189,6 @@ describe("buildOrder", () => {
 
     // 🚀 调用被测函数
     const order = await buildOrder(fakeOrderCard);
-		console.log(order)
 
     expect(order).toEqual({
       orderNumber: "123-4567890-1234567",
@@ -194,14 +197,17 @@ describe("buildOrder", () => {
 			"address": "2101 E TERRA LN, O FALLON, MO",
 			"paymentMethod": "AMEX ending in 2085",
 			cost: {
-				"original_cost": 5.49,
-				"original_currency": "GBP",
-				"original_total": 5.49,
-				"payment_currency": "USD",
-				"payment_total": 7.56,
-				"shipping": 0,
-				"subTotal": 5.49,
+				subTotal: 5.49,
+				shipping: 0,
+				tax: 0,
+				original_currency: 'GBP',
+				original_cost: 5.49,
+				usd_cost: 7.56,
+				exchange_rate: 1.377049,
+				payment_currency: 'USD',
+				payment_total: 7.56
 			},
+
 			shipments: {
  				"BW5XJjGqd": {
  					"items": {

@@ -42,6 +42,21 @@ export function extractOrderCost(doc: Document) {
       continue;
     }
 
+		if (label.includes("grand total")) {
+      cost.original_total = amount;
+      cost.original_currency = currency;
+
+      // ⭐⭐ 关键：ACC 场景下，Grand Total 就是 Payment Total
+      // if (currency === "USD" && hasExchangeRateHint) {
+      if (currency === "USD") {
+        cost.payment_total = amount;
+        cost.payment_currency = currency;
+      }
+
+      continue;
+    }
+
+
     /* ---------- 基础字段 ---------- */
     if (label.includes("subtotal") && !label.includes("before")) {
       cost.subTotal = amount;
@@ -69,7 +84,7 @@ export function extractOrderCost(doc: Document) {
       cost.original_currency = currency;
 
       // ⭐⭐ 关键：ACC 场景下，Grand Total 就是 Payment Total
-      if (currency === "USD" && hasExchangeRateHint) {
+      if (currency === "USD") {
         cost.payment_total = amount;
         cost.payment_currency = currency;
       }

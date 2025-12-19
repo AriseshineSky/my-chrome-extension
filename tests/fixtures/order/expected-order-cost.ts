@@ -6,6 +6,8 @@ export const EXPECTED_ORDER_INFO = {
 		original_total: 4.84,
 		original_currency: "USD",
 		original_cost: 4.84,
+    payment_currency: "USD",
+    payment_total: 4.84,
   },
   "order/202-9691085-8778754.html": {
     "original_cost": 5.49,

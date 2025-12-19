@@ -3,10 +3,9 @@ import { extractOrderSummary } from "../extract/extract-order-summary";
 import { extractOrderCost } from "../extract/extract-order-cost";
 import { extractShippingAddress } from "../extract/extract-shipping-address";
 import { extractPaymentMethod } from "../extract/extract-payment-method";
-
 import { fetchOrderDetail } from "./fetch-order-detail";
 import { buildShipments } from "./build-shipments";
-
+import { normalizeOrderCost } from "@/order/domain/normalize-order-cost";
 import { Order } from "@/domain/Order";
 
 export async function buildOrder(
@@ -15,7 +14,8 @@ export async function buildOrder(
   const summary = extractOrderSummary(orderCard);
   const detailDoc = await fetchOrderDetail(orderCard);
 
-  const cost = extractOrderCost(detailDoc);
+	const rawCost = extractOrderCost(detailDoc);
+	const cost = normalizeOrderCost(rawCost);
   const address = extractShippingAddress(detailDoc);
   const paymentMethod = extractPaymentMethod(detailDoc);
 
