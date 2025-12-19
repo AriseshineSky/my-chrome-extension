@@ -2,7 +2,7 @@
 import { collectOrdersOnPage } from "./list/order-list";
 import { saveOrders } from "./save/save-orders";
 import { goToNextPage } from "./list/pagination";
-import {  isOrdersExpired } from "./domain/is-order-expired";
+import { isOrdersExpired } from "./domain/is-order-expired";
 
 export async function syncOrders(user) {
   const orders = await collectOrdersOnPage();

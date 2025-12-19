@@ -23,7 +23,7 @@ export async function buildOrder(
 
   return {
     ...summary,
-    ...cost,
+    cost,
     address,
     paymentMethod,
     shipments,
