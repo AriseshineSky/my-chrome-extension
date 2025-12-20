@@ -2,7 +2,7 @@ import type { Order } from "../../domain/Order";
 
 export function isOrdersExpired(orders: Order[]): boolean {
   return orders.some(order =>
-    order.buyOrderDate && isExpired(order.buyOrderDate),
+    order.orderDate && isExpired(order.orderDate),
   );
 }
 
@@ -11,7 +11,7 @@ function isExpired(dateStr: string): boolean {
   if (isNaN(date.getTime())) return false;
 
   const threeMonthsAgo = new Date();
-  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 1);
 
   return date < threeMonthsAgo;
 }

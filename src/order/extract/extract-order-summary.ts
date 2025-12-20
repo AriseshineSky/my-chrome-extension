@@ -14,7 +14,7 @@ export function extractOrderSummary(root: Element) {
     if (li) {
       const label = li.querySelector("span.a-color-secondary.a-text-caps");
       if (label?.textContent.toLowerCase().trim() === "order placed") {
-        const dateSpan = li.querySelector("span.a-size-base.a-color-secondary.aok-break-word");
+        const dateSpan = li.querySelector("span.a-color-secondary.aok-break-word");
         orderDate = dateSpan?.textContent.trim() ?? null;
       }
     }
