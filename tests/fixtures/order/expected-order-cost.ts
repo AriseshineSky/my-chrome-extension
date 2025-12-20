@@ -6,7 +6,6 @@ export const EXPECTED_ORDER_INFO = {
 		original_total: 69.45,
 		original_currency: "USD",
 		original_cost: 69.45,
-		final_paid_usd: 69.45,
     "total_before_tax": 69.45,
 	},
   "order/111-6784099-6345037.html": {
@@ -16,7 +15,6 @@ export const EXPECTED_ORDER_INFO = {
 		original_total: 4.84,
 		original_currency: "USD",
 		original_cost: 4.84,
-		final_paid_usd: 4.84,
     "total_before_tax": 4.48,
   },
   "order/202-9691085-8778754.html": {
@@ -27,7 +25,6 @@ export const EXPECTED_ORDER_INFO = {
     "payment_total": 7.56,
     "shipping": 0,
     "subTotal": 5.49,
-		final_paid_usd: 7.56,
   },
   "order/202-2103857-5887544.html": {
     "original_cost": 16.99,
@@ -39,7 +36,6 @@ export const EXPECTED_ORDER_INFO = {
     "subTotal": 14.16,
     "tax": 2.83,
     "total_before_tax": 14.16,
-		final_paid_usd: 23.39
   },
   "order/202-6344826-2669928.html": {
     "original_cost": 83.8,
@@ -51,7 +47,6 @@ export const EXPECTED_ORDER_INFO = {
     "subTotal": 69.84,
     "tax": 13.96,
     "total_before_tax": 69.84,
-		final_paid_usd: 114.92,
   },
   "order/205-1272725-0305915.html": {
      "original_cost": 27.44,
@@ -63,6 +58,14 @@ export const EXPECTED_ORDER_INFO = {
      "subTotal": 26.8,
      "tax": 0,
      "total_before_tax": 26.8,
-			final_paid_usd: 27.44,
+  },
+  "order/204-8358722-5934724.html": {
+		subTotal: 6.66,
+		shipping: 0,
+		total_before_tax: 6.66,
+		tax: 1.33,
+		original_total: 7.99,
+		original_currency: 'GBP',
+		original_cost: 7.99
   },
 };

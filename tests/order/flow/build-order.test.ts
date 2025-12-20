@@ -1,6 +1,7 @@
 // tests/order/flow/build-order.test.ts
 import { describe, it, expect, vi } from "vitest";
 import { buildOrder } from "@/order/flow/build-order";
+import { ORDER_SELECTOR } from "@/order/list/order-selectors";
 
 vi.mock("@/order/extract/extract-order-summary", () => ({
   extractOrderSummary: vi.fn(),

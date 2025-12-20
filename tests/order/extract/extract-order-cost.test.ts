@@ -4,7 +4,7 @@ import { extractOrderCost } from "@/order/extract/extract-order-cost";
 import { EXPECTED_ORDER_INFO } from "../../fixtures/order/expected-order-cost";
 import { loadHTML } from "../../utils/load-html";
 
-describe("extractOrderCost (111-6784099-6345037)", () => {
+describe("extractOrderCost", () => {
   Object.entries(EXPECTED_ORDER_INFO).forEach(
     ([file, expected]) => {
       it(`extracts order cost info from ${file}`, () => {

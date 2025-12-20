@@ -12,15 +12,20 @@ export async function buildOrder(
   orderCard: Element,
 ): Promise<Order> {
   const summary = extractOrderSummary(orderCard);
+	console.log(summary)
   const detailDoc = await fetchOrderDetail(orderCard);
 
 	const rawCost = extractOrderCost(detailDoc);
+	console.log(rawCost)
 	const cost = normalizeOrderCost(rawCost);
+	console.log(cost)
   const address = extractShippingAddress(detailDoc);
+	console.log(address)
   const paymentMethod = extractPaymentMethod(detailDoc);
 
+	console.log(paymentMethod)
   const shipments = await buildShipments(detailDoc);
-
+	console.log(shipments)
   return {
     ...summary,
     cost,
