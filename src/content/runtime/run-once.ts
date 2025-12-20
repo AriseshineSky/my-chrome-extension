@@ -11,19 +11,56 @@ const SOURCES = {
 	"de": "AMZ_DE"
 }
 
-function ensureDomReady(): Promise<void> {
-  if (document.readyState === "interactive" || document.readyState === "complete") {
-    return Promise.resolve();
-  }
-  return new Promise(resolve =>
-    document.addEventListener("DOMContentLoaded", () => resolve(), { once: true }),
-  );
+export function ensureOrdersReady(timeout = 30000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    const check = () => {
+      // 1️⃣ 订单号（最终一定会出现）
+      const hasOrderNumber =
+        document.body.innerText.match(/\b\d{3}-\d{7}-\d{7}\b/);
+			console.log(hasOrderNumber)
+
+      // 2️⃣ 订单详情链接（US / UK / Business 通用）
+      const orderDetailLinks =
+        document.querySelectorAll(
+          'a[href*="order-details"], a[href*="your-account"]'
+        ).length > 0;
+
+			console.log(orderDetailLinks)
+
+      // 3️⃣ 商品标题链接（不是 skeleton）
+      const productLinks =
+        document.querySelectorAll(
+          'a[href*="/dp/"], a[href*="/gp/product/"]'
+        ).length > 0;
+
+			console.log(productLinks)
+      if (hasOrderNumber && (orderDetailLinks || productLinks)) {
+        resolve();
+        return;
+      }
+
+      if (Date.now() - start > timeout) {
+        reject(
+          new Error(
+            "Amazon orders page did not hydrate order data in time",
+          ),
+        );
+        return;
+      }
+
+      setTimeout(check, 500);
+    };
+
+    check();
+  });
 }
 
 export async function runOnce() {
   if (!isTaskRunning()) return;
 
-  await ensureDomReady();
+  await ensureOrdersReady();
   refreshTaskTTL();
 
   const country = getCurrentAmazonCountry();
@@ -40,9 +77,10 @@ export async function runOnce() {
 	if (country in SOURCES) {
 		user.source = SOURCES[country as keyof typeof SOURCES];
 	} else {
-		user.source = 'us'; // 默认值
+		user.source = 'AMZ_US'; // 默认值
 	}
 
+	console.log(user)
   sendClickLog(user.email);
 
   try {

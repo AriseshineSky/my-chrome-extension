@@ -11,6 +11,7 @@ import { Order } from "@/domain/Order";
 export async function buildOrder(
   orderCard: Element,
 ): Promise<Order> {
+	console.log(orderCard)
   const summary = extractOrderSummary(orderCard);
 	console.log(summary)
   const detailDoc = await fetchOrderDetail(orderCard);
