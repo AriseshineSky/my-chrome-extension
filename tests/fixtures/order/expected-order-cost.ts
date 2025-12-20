@@ -1,4 +1,14 @@
 export const EXPECTED_ORDER_INFO = {
+	"order/114-8761752-1634604.html": {
+		subTotal: 69.45,
+		shipping: 0,
+		tax: 0,
+		original_total: 69.45,
+		original_currency: "USD",
+		original_cost: 69.45,
+		final_paid_usd: 69.45,
+    "total_before_tax": 69.45,
+	},
   "order/111-6784099-6345037.html": {
 		subTotal: 4.48,
 		shipping: 0,
@@ -7,6 +17,7 @@ export const EXPECTED_ORDER_INFO = {
 		original_currency: "USD",
 		original_cost: 4.84,
 		final_paid_usd: 4.84,
+    "total_before_tax": 4.48,
   },
   "order/202-9691085-8778754.html": {
     "original_cost": 5.49,

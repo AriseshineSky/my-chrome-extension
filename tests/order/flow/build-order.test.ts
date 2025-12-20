@@ -235,5 +235,105 @@ describe("buildOrder", () => {
     expect(fetchOrderDetail).toHaveBeenCalledWith(fakeOrderCard);
     expect(buildShipments).toHaveBeenCalledWith(fakeDetailDoc);
   });
+
+  it("assembles order from  no tax shipping all extractors correctly", async () => {
+    const fakeOrderCard = document.createElement("div");
+    const fakeDetailDoc = document.implementation.createHTMLDocument("detail");
+
+    // 👇 准备 mock 返回值
+    (extractOrderSummary as any).mockReturnValue({
+      orderNumber: "123-4567890-1234567",
+      buyOrderDate: "2024-01-01",
+      shipTo: "Joy Z",
+    });
+
+    (fetchOrderDetail as any).mockResolvedValue(fakeDetailDoc);
+
+    (extractOrderCost as any).mockReturnValue({
+			"original_cost": 5.49,
+			"original_currency": "GBP",
+			"original_total": 5.49,
+			"payment_currency": "USD",
+			"payment_total": 7.56,
+			"subTotal": 5.49,
+			final_paid_usd: 7.56,
+    });
+
+    (extractShippingAddress as any).mockReturnValue(
+      "2101 E TERRA LN, O FALLON, MO",
+    );
+
+    (extractPaymentMethod as any).mockReturnValue("AMEX ending in 2085");
+
+    (buildShipments as any).mockResolvedValue(
+			{
+				BW5XJjGqd: {
+				 "items": {
+					 "B06XYNHFF2": {
+						 "asin": "B06XYNHFF2",
+						 "originalCost": 4.48,
+						 "originalCurrency": "USD",
+						 "originalPrice": 4.48,
+						 "priceText": "$4.48",
+						 "quantity": 1,
+					 },
+				 },
+				 "shipmentId": "BW5XJjGqd",
+				 "status": "Delivered",
+				 "tracking": {
+					 "carrier": "Amazon",
+					 "tracking": "TBA123",
+				 },
+			 }
+			}
+    );
+
+    // 🚀 调用被测函数
+    const order = await buildOrder(fakeOrderCard);
+
+    expect(order).toEqual({
+      orderNumber: "123-4567890-1234567",
+      buyOrderDate: "2024-01-01",
+      shipTo: "Joy Z",
+			"address": "2101 E TERRA LN, O FALLON, MO",
+			"paymentMethod": "AMEX ending in 2085",
+			cost: {
+				subTotal: 5.49,
+				original_currency: 'GBP',
+				original_cost: 5.49,
+				usd_cost: 7.56,
+				exchange_rate: 1.377049,
+				payment_currency: 'USD',
+				payment_total: 7.56,
+				final_paid_usd: 7.56,
+				tax: 0,
+				shipping: 0
+			},
+
+			shipments: {
+ 				"BW5XJjGqd": {
+ 					"items": {
+ 						"B06XYNHFF2": {
+ 							"asin": "B06XYNHFF2",
+ 							"originalCost": 4.48,
+ 							"originalCurrency": "USD",
+ 							"originalPrice": 4.48,
+ 							"priceText": "$4.48",
+ 							"quantity": 1,
+ 						},
+ 					},
+ 					"shipmentId": "BW5XJjGqd",
+ 					"status": "Delivered",
+ 					"tracking": {
+ 						"carrier": "Amazon",
+ 						"tracking": "TBA123",
+ 					},
+ 				},
+ 			},
+    });
+
+    expect(fetchOrderDetail).toHaveBeenCalledWith(fakeOrderCard);
+    expect(buildShipments).toHaveBeenCalledWith(fakeDetailDoc);
+  });
 });
 

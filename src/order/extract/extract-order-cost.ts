@@ -62,12 +62,30 @@ export function extractOrderCost(doc: Document) {
       continue;
     }
 
-    if (label.includes("shipping") || label.includes("postage")) {
+		 /* ---------- Shipping（严格限定） ---------- */
+    if (
+      label.includes("shipping") ||
+      label.includes("postage") ||
+      label.includes("delivery")
+    ) {
+      if (
+        label.includes("eligible") ||
+        label.includes("exchange") ||
+        label.includes("fee")
+      ) {
+        continue;
+      }
+
       cost.shipping = amount;
       continue;
     }
 
-    if (label === "vat:" || label.includes(" tax")) {
+		/* ---------- Tax ---------- */
+    if (
+      label === "vat:" ||
+      label.includes("estimated tax") ||
+      label.endsWith(" tax")
+    ) {
       cost.tax = amount;
       continue;
     }
