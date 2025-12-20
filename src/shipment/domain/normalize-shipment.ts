@@ -15,7 +15,7 @@ export function normalizeShipment(
 ) {
   return {
     shipment_id: raw.shipmentId ?? null,
-    shipment_status: raw.status ?? null,
+    status: raw.status ?? null,
 
     tracking: raw.tracking?.tracking ?? null,
     carrier: raw.tracking?.carrier ?? null,
