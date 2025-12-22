@@ -16,7 +16,11 @@ export async function syncOrders(user: any) {
 		validOrders.length > 0 &&
 		!isOrdersExpired(validOrders)
 	) {
-		goToNextPage();
+		while (true) {
+			const moved = await goToNextPage();
+			if (!moved) break;
+		}
+
 		return false;
 	}
 }
