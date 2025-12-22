@@ -4,7 +4,7 @@ function normalizeShipmentItem(raw: Record<string, any>) {
   return {
     asin: raw.asin,
     quantity: raw.quantity ?? 1,
-    price: raw.originalCost ?? 0,
+    price: raw.originalPrice ?? 0,
     currency: raw.originalCurrency ?? null,
   };
 }
