@@ -108,7 +108,7 @@ export async function sendClickLog(email?: string) {
   if (!email) return;
 
   await retryFetch(
-    `${BASE_URL.replace("/amazon_orders", "")}/plugin_click_logs?token=${API_TOKEN}`,
+    `${BASE_URL.replace("/amazon_orders", "").replace("v3", "v2")}/plugin_click_logs?token=${API_TOKEN}`,
     {
       method: "POST",
       headers,

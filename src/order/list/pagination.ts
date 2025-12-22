@@ -1,76 +1,63 @@
 const NEXT_PAGE_SELECTOR = "ul.a-pagination > li.a-last > a";
-import { ORDER_SELECTOR } from "./order-selectors";
 
+import { ORDER_SELECTOR } from "./order-selectors";
 import { ensureOrdersReady } from "@/content/runtime/run-once";
 
-function waitForUrlOrDomChange(
-  prevUrl: string,
-  timeout: number,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const start = Date.now();
-
-    const observer = new MutationObserver(() => {
-      if (location.href !== prevUrl) {
-        observer.disconnect();
-        resolve();
-      }
-    });
-
-    const container = document.querySelector(ORDER_SELECTOR);
-    if (container) {
-      observer.observe(container, { childList: true, subtree: true });
-    }
-
-    const timer = setInterval(() => {
-      if (location.href !== prevUrl) {
-        cleanup();
-        resolve();
-      }
-
-      if (Date.now() - start > timeout) {
-        cleanup();
-        reject(new Error("Pagination timeout"));
-      }
-    }, 300);
-
-    function cleanup() {
-      observer.disconnect();
-      clearInterval(timer);
-    }
-  });
+function getCurrentPage(): number {
+  const match = location.hash.match(/pagination\/(\d+)/);
+  return match ? Number(match[1]) : 1;
 }
 
-export async function goToNextPage(
-  timeout = 30000,
-): Promise<boolean> {
+function getNextPageNumber(): number | null {
+  const nextLink = document.querySelector<HTMLAnchorElement>(
+    'li.a-last a[href]'
+  );
+  if (!nextLink) return null;
 
-  // ✅ 每次重新获取（关键）
-  const nextBtn = document.querySelector(
-    NEXT_PAGE_SELECTOR,
-  ) as HTMLAnchorElement | null;
-
-  console.log("nextBtn connected:", nextBtn?.isConnected);
-
-  if (!nextBtn || !nextBtn.isConnected) {
-    return false;
+  const href = nextLink.getAttribute("href")!;
+	console.log("href")
+	console.log(href)
+  
+  // Case A: 真实 URL
+  const match = href.match(/pagination\/(\d+)/);
+  if (match) {
+    return Number(match[1]);
   }
 
-  const prevUrl = location.href;
-
-  nextBtn.click();
-
-  try {
-    // 👇 两种方式都兜住
-    await Promise.race([
-      ensureOrdersReady(timeout),              // 普通账号
-      waitForUrlOrDomChange(prevUrl, timeout), // Business AJAX
-    ]);
-  } catch (e) {
-    console.warn("Next page failed:", e);
-    return false;
+  // Case B: #pagination/next/
+  if (href.includes("#pagination/next")) {
+    const current = getCurrentPage();
+    return current + 1;
   }
+
+  return null;
+}
+
+function goToPage(page: number) {
+  const base = "/gp/your-account/order-history";
+  const url = `${base}#pagination/${page}/`;
+  location.href = url;
+}
+
+async function goToNextPageSafe() {
+	await ensureOrdersReady();
+	const nextPage = getNextPageNumber();
+	if (!nextPage) {
+		return null;
+	}
+
+	goToPage(nextPage);
+
+	await new Promise(r => setTimeout(r, 1500));
 
   return true;
 }
 
+
+export async function goToNextPage(
+  timeout = 30000,
+) {
+	console.log("current")
+	console.log(location.href)
+	await goToNextPageSafe()
+}
