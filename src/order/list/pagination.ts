@@ -8,7 +8,7 @@ function getCurrentPage(): number {
   return match ? Number(match[1]) : 1;
 }
 
-function getNextPageNumber(): number | null {
+function getNextPageUrl(): string | null {
   const nextLink = document.querySelector<HTMLAnchorElement>(
     'li.a-last a[href]'
   );
@@ -19,29 +19,33 @@ function getNextPageNumber(): number | null {
 	console.log(href)
   
   // Case A: 真实 URL
-  const match = href.match(/pagination\/(\d+)/);
-  if (match) {
-    return Number(match[1]);
-  }
+
+	const url = new URL(href, location.origin);
+  const startIndex = url.searchParams.get("startIndex");
+	if (startIndex !== null) {
+		return href;
+	}
+
 
   // Case B: #pagination/next/
   if (href.includes("#pagination/next")) {
     const current = getCurrentPage();
-    return current + 1;
-  }
+
+		const base = "/gp/your-account/order-history";
+		const url = `${base}#pagination/${current + 1}/`;
+		return url;
+	}
 
   return null;
 }
 
-function goToPage(page: number) {
-  const base = "/gp/your-account/order-history";
-  const url = `${base}#pagination/${page}/`;
+function goToPage(url: string) {
   location.href = url;
 }
 
 async function goToNextPageSafe() {
 	await ensureOrdersReady();
-	const nextPage = getNextPageNumber();
+	const nextPage = getNextPageUrl();
 	if (!nextPage) {
 		return null;
 	}

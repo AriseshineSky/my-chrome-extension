@@ -1,7 +1,7 @@
 // src/order/flow/build-shipments.ts
 import { buildShipment } from "@/shipment/flow/build-shipment";
 
-const SHIPMENT_SELECTOR = 'div[data-component="shipments"] div.a-box';
+export const SHIPMENT_SELECTOR = 'div[data-component="shipments"] div.a-box';
 
 export async function buildShipments(
   doc: Document,
