@@ -1,6 +1,20 @@
 import { parseMoney } from "@/money/parse-money";
 
-export function extractOrderCost(doc: Document) {
+const LABEL_MAP = {
+  subtotal: ["subtotal"],
+  shipping: ["shipping", "envío", "envio", "costo de envío"],
+  tax: ["impuesto", "impuestos", "vat", "estimated tax to be collected"],
+  total_before_tax: ["before tax", "antes de impuestos", "total before vat"],
+  grand_total: ["grand total", "total del pedido", "total"],
+  payment_total: ["payment total", "total del pago", "payment grand total"],
+};
+
+
+function matchLabel(label: string, keys: string[]) {
+  return keys.some(k => label.includes(k));
+}
+
+export function extractOrderCost(doc: Document, context: {domain?: string}) {
   const container =
     doc.querySelector('[data-component="chargeSummary"]') ??
     doc.querySelector('[data-component="orderSubtotals"]');
@@ -32,96 +46,66 @@ export function extractOrderCost(doc: Document) {
     const valueText = valueElem.textContent?.trim();
     if (!label || !valueText) continue;
 
-    const { amount, currency } = parseMoney(valueText);
-    if (!Number.isFinite(amount)) continue;
+		const parsed = parseMoney(valueText, context);
+    if (!Number.isFinite(parsed.amount)) continue;
 
-    /* ---------- 明确 Payment Total（双行模式） ---------- */
-    if (label.includes("payment") && label.includes("total")) {
+    let currency = parsed.currency;
+		const isUSD = currency === "USD";
+
+    const amount = parsed.amount;
+
+		const isPaymentRow = matchLabel(label, LABEL_MAP.payment_total) || label.includes("payment");
+
+
+    /* ---------- Payment Total ---------- */
+    if (matchLabel(label, LABEL_MAP.payment_total)) {
       cost.payment_total = amount;
       cost.payment_currency = currency;
       continue;
     }
 
-		if (label.includes("grand total")) {
-      cost.original_total = amount;
-      cost.original_currency = currency;
-
-      // ⭐⭐ 关键：ACC 场景下，Grand Total 就是 Payment Total
-      if (currency === "USD" && hasExchangeRateHint) {
-        cost.payment_total = amount;
-        cost.payment_currency = currency;
-      }
-
-      continue;
-    }
-
-
-    /* ---------- 基础字段 ---------- */
-    if (label.includes("subtotal") && !label.includes("before")) {
-      cost.subTotal = amount;
-      continue;
-    }
-
-		 /* ---------- Shipping（严格限定） ---------- */
-    if (
-      label.includes("shipping") ||
-      label.includes("postage") ||
-      label.includes("delivery")
-    ) {
-      if (
-        label.includes("eligible") ||
-        label.includes("exchange") ||
-        label.includes("fee")
-      ) {
-        continue;
-      }
-
-      cost.shipping = amount;
-      continue;
-    }
-
-		/* ---------- Tax ---------- */
-    if (
-      label === "vat:" ||
-      label.includes("estimated tax") ||
-      label.endsWith(" tax")
-    ) {
-      cost.tax = amount;
-      continue;
-    }
-
-    if (label.includes("before") && label.includes("total")) {
+    /* ---------- Total Before Tax ---------- */
+    if (matchLabel(label, LABEL_MAP.total_before_tax)) {
       cost.total_before_tax = amount;
       continue;
     }
 
-    /* ---------- Grand Total（关键逻辑） ---------- */
-    if (label.includes("grand total")) {
-      cost.original_total = amount;
-      cost.original_currency = currency;
-
-      // ⭐⭐ 关键：ACC 场景下，Grand Total 就是 Payment Total
-      if (currency === "USD") {
-        cost.payment_total = amount;
-        cost.payment_currency = currency;
-      }
-
+    /* ---------- Tax ---------- */
+    if (matchLabel(label, LABEL_MAP.tax)) {
+      cost.tax = amount;
       continue;
     }
 
-    /* ---------- 普通 Total fallback ---------- */
-    if ((label === "total:" || label.endsWith(" total")) && !cost.original_total) {
-      cost.original_total = amount;
-      cost.original_currency = currency;
+    /* ---------- Shipping ---------- */
+    if (matchLabel(label, LABEL_MAP.shipping) && !label.includes("tax")) {
+      cost.shipping = amount;
+      continue;
     }
+
+    /* ---------- Subtotal ---------- */
+    if (matchLabel(label, LABEL_MAP.subtotal)) {
+      cost.subTotal = amount;
+      continue;
+    }
+
+		if (matchLabel(label, LABEL_MAP.grand_total)) {
+			cost.original_total = amount;
+			cost.original_currency = currency;
+			if (hasExchangeRateHint && isUSD) {
+				cost.payment_total = amount;
+				cost.payment_currency = currency;
+				continue;
+			}
+			continue;
+		}
+
   }
 
+	cost.original_cost =
+  cost.original_total ??
+  cost.subTotal ??
+  0;
 
-  /* ---------- original_cost ---------- */
-  cost.original_cost =
-    cost.original_total ??
-    cost.subTotal ??
-    0;
 
   return cost;
 }

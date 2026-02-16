@@ -1,10 +1,12 @@
+import { inferCurrencyFromContext } from "@/domain/currency/infer-currency";
+
 const SYMBOL_TO_CURRENCY: Record<string, string> = {
   "$": "USD",
   "£": "GBP",
   "€": "EUR",
 };
 
-export function parseMoney(text: string): {
+export function parseMoney(text: string, context: { domain?: string }): {
   amount: number;
   currency: string | null;
 } {
@@ -21,9 +23,10 @@ export function parseMoney(text: string): {
   }
 
   const symbol = clean.match(/^([$£€])\s*([\d,.]+)/);
+
   if (symbol) {
     return {
-      currency: SYMBOL_TO_CURRENCY[symbol[1]] ?? null,
+      currency: inferCurrencyFromContext(symbol[1], context),
       amount: Number(symbol[2].replace(/,/g, "")),
     };
   }
