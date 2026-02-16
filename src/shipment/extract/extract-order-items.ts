@@ -50,18 +50,23 @@ function extractOrderItem(
   const quantity = extractQuantity(elem);
 
   const originalPrice = extractOriginalAmount(priceText);
-  const originalCurrency = extractCurrency(priceText);
-
+	const currencySymbol = extractCurrencySymbol(priceText);
 
   return {
     asin,
     quantity,
     originalPrice,
-    originalCurrency,
+    currencySymbol,
     originalCost: Number((originalPrice * quantity).toFixed(2)),
     priceText,
   };
 }
+
+function extractCurrencySymbol(priceText: string): string | null {
+  const match = priceText.match(/([£$€])/);
+  return match ? match[1] : null;
+}
+
 
 function extractAsin(url: string): string | null {
   return (

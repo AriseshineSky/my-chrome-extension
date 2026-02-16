@@ -3,8 +3,9 @@ export interface OrderItem {
   asin: string;
   quantity: number;
   originalPrice: number;
-  originalCurrency: string | null;
+  originalCurrency?: string | null;
   originalCost: number;
 	priceText: string;
+	currencySymbol: string | null;
 }
 

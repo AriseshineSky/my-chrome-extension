@@ -4,7 +4,7 @@ export const EXPECTED_SHIPMENT_ITEMS = {
     asin: 'B09RKNX5BJ',
     quantity: 2,
     originalPrice: 14.99,
-    originalCurrency: 'GBP',
+		currencySymbol: "£",
     originalCost: 29.98,
     priceText: '£14.99'
   }
@@ -14,7 +14,7 @@ export const EXPECTED_SHIPMENT_ITEMS = {
     asin: 'B06XYNHFF2',
     quantity: 1,
     originalPrice: 4.48,
-    originalCurrency: 'USD',
+		currencySymbol: "$",
     originalCost: 4.48,
     priceText: '$4.48'
   }
@@ -24,7 +24,7 @@ export const EXPECTED_SHIPMENT_ITEMS = {
     asin: 'B07B8HBHZM',
     quantity: 1,
     originalPrice: 5.49,
-    originalCurrency: 'GBP',
+		currencySymbol: "£",
     originalCost: 5.49,
     priceText: '£5.49'
   }
@@ -34,7 +34,7 @@ export const EXPECTED_SHIPMENT_ITEMS = {
     asin: 'B012A8RF3O',
     quantity: 1,
     originalPrice: 16.99,
-    originalCurrency: 'GBP',
+		currencySymbol: "£",
     originalCost: 16.99,
     priceText: '£16.99'
   }
@@ -44,7 +44,7 @@ export const EXPECTED_SHIPMENT_ITEMS = {
     asin: 'B0D29KGKZ5',
     quantity: 1,
     originalPrice: 41.9,
-    originalCurrency: 'GBP',
+		currencySymbol: "£",
     originalCost: 41.9,
     priceText: '£41.90'
   }
@@ -52,23 +52,32 @@ export const EXPECTED_SHIPMENT_ITEMS = {
   },
   "order/205-1272725-0305915.html": {
 		B01HMW5EKE: {
-    asin: 'B01HMW5EKE',
-    quantity: 1,
-    originalPrice: 19.99,
-    originalCurrency: 'GBP',
-    originalCost: 19.99,
-    priceText: '£19.99'
-  }
-
+			asin: 'B01HMW5EKE',
+			quantity: 1,
+			originalPrice: 19.99,
+			currencySymbol: "£",
+			originalCost: 19.99,
+			priceText: '£19.99'
+		}
   },
   "order/204-8358722-5934724.html": {
 		B0DZGV6TXS: {
 			asin: 'B0DZGV6TXS',
 			quantity: 1,
 			originalPrice: 7.99,
-			originalCurrency: 'GBP',
+			currencySymbol: "£",
 			originalCost: 7.99,
 			priceText: '£7.99'
+		}
+  },
+  "order/702-8792653-5071433.html": {
+		B07GT6LGZH: {
+			asin: 'B07GT6LGZH',
+			quantity: 1,
+			originalPrice: 1131.00,
+			currencySymbol: "$",
+			originalCost: 1131.00,
+			priceText: '$1,131.00'
 		}
   },
 };
