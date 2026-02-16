@@ -8,7 +8,8 @@ import { loadUser } from "./user";
 const SOURCES = {
 	"us": "AMZ_US",
 	"uk": "AMZ_UK",
-	"de": "AMZ_DE"
+	"de": "AMZ_DE",
+	"mx": "AMZ_MX"
 }
 
 export function ensureOrdersReady(timeout = 30000): Promise<void> {

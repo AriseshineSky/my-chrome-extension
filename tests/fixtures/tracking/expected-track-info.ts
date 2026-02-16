@@ -18,4 +18,8 @@ export const EXPECTED_TRACK_INFO: Record<
     tracking: "UK2959311818",
     carrier: "Amazon",
   },
+  "tracking/DQX9C2A2Y.html": {
+    tracking: null,
+    carrier: "Amazon",
+  },
 };

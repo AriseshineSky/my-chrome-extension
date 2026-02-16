@@ -3,12 +3,14 @@ const DOMAIN_BY_COUNTRY: Record<string, string> = {
   us: "amazon.com",
   uk: "amazon.co.uk",
   de: "amazon.de",
+	mx: "amazon.com.mx"
 };
 
 const COOKIE_BY_COUNTRY: Record<string, string> = {
   us: "x-main=",
   uk: "x-acbuk=",
   de: "x-acbde=",
+  mx: "x-acbmx=",
 };
 
 export function getCurrentAmazonCountry(): string | null {
