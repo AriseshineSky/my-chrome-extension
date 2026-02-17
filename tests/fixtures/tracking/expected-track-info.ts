@@ -22,4 +22,12 @@ export const EXPECTED_TRACK_INFO: Record<
     tracking: null,
     carrier: "Amazon",
   },
+  "tracking/DfMdZRxKJ.html": {
+    tracking: "501589729641C606487717",
+    carrier: "Estafeta",
+  },
+  "tracking/PWmBd8ZDT.html": {
+    tracking: "TBM643049659009",
+    carrier: "Amazon",
+  },
 };

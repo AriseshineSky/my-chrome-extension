@@ -85,9 +85,48 @@ describe("extractOrderSummary (US orders list)", () => {
   });
 });
 
-
 describe("extractOrderSummary (UK biz orders list)", () => {
   const doc = loadHTML("uk-biz-orders.html");
+
+  const orderCards = Array.from(
+    doc.querySelectorAll(ORDER_SELECTOR),
+  );
+
+  it("should find order cards on list page", () => {
+    expect(orderCards.length).toBeGreaterThan(0);
+  });
+
+  orderCards.slice(0, 3).forEach((orderCard, index) => {
+    it(`extracts summary from order card #${index + 1}`, () => {
+      const summary = extractOrderSummary(orderCard);
+			console.log(summary)
+
+      expect(summary).toHaveProperty("orderNumber");
+      expect(summary).toHaveProperty("orderDate");
+      expect(summary).toHaveProperty("shipTo");
+      expect(summary).toHaveProperty("placedBy");
+
+      if (summary.orderNumber) {
+        expect(summary.orderNumber).toMatch(/\d{3}-\d{7}-\d{7}/);
+      }
+
+      if (summary.orderDate) {
+        expect(summary.orderDate.length).toBeGreaterThan(0);
+      }
+
+      if (summary.shipTo) {
+        expect(summary.shipTo.length).toBeGreaterThan(0);
+      }
+
+      if (summary.placedBy) {
+        expect(summary.placedBy.length).toBeGreaterThan(0);
+      }
+    });
+  });
+});
+
+describe("extractOrderSummary (mx orders list)", () => {
+  const doc = loadHTML("mx-orders.html");
 
   const orderCards = Array.from(
     doc.querySelectorAll(ORDER_SELECTOR),
