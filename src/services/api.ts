@@ -66,20 +66,20 @@ export async function post(payload: any) {
       },
     );
 
-    // 日志也包裹 try/catch
-    try {
-      await sendLog({
-        source: "amazon-order",
-        level: result.ok ? "info" : "error",
-        message: result.ok ? `Synced orders` : `Sync failed`,
-        metadata: {
-          order_count: payload.orders.length,
-          result,
-        },
-      });
-    } catch {
-      // ❌ 日志失败不影响主流程
-    }
+    // // 日志也包裹 try/catch
+    // try {
+    //   await sendLog({
+    //     source: "amazon-order",
+    //     level: result.ok ? "info" : "error",
+    //     message: result.ok ? `Synced orders` : `Sync failed`,
+    //     metadata: {
+    //       order_count: payload.orders.length,
+    //       result,
+    //     },
+    //   });
+    // } catch {
+    //   // ❌ 日志失败不影响主流程
+    // }
 
     return result.ok;
   } catch (err) {

@@ -30,4 +30,8 @@ export const EXPECTED_TRACK_INFO: Record<
     tracking: "TBM643049659009",
     carrier: "Amazon",
   },
+  "tracking/ca/PhmF64nHP.html": {
+    tracking: "INTLCMH833418027",
+    carrier: "Intelcom Courrier Canada Inc.",
+  },
 };

@@ -1,4 +1,7 @@
-import {ShippedWithStrategy, AmazonCarrierStrategy, SpanishTrackingStrategy, SpanishCarrierStrategy,  EnglishTrackingStrategy } from "./TrackingStrategy";
+import {
+	ShippedWithStrategy, AmazonCarrierStrategy, SpanishTrackingStrategy, SpanishCarrierStrategy,
+	EnglishTrackingStrategy, DeliveryByStrategy
+} from "./TrackingStrategy";
 
 const trackingStrategies = [
   new EnglishTrackingStrategy(),
@@ -9,6 +12,7 @@ const carrierStrategies = [
   new AmazonCarrierStrategy(),
   new ShippedWithStrategy(),
 	new SpanishCarrierStrategy(),
+	new DeliveryByStrategy(),
 ];
 
 export function extractTrackInfoFromText(

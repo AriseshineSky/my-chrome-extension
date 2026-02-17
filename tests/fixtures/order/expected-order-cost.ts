@@ -77,4 +77,15 @@ export const EXPECTED_ORDER_INFO = {
 		original_currency: 'MXN',
 		original_cost: 1131.00
   },
+  "order/ca/701-0633616-0122637.html": {
+		subTotal: 11.94,
+		shipping: 3.65,
+		original_total: 18.36,
+		original_currency: 'USD',
+		original_cost: 18.36,
+    total_before_tax: 15.59,
+    payment_currency: "USD",
+    payment_total: 18.36,
+		tax: 2.34,
+  },
 };

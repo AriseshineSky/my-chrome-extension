@@ -3,7 +3,9 @@ import { parseMoney } from "@/money/parse-money";
 const LABEL_MAP = {
   subtotal: ["subtotal"],
   shipping: ["shipping", "envío", "envio", "costo de envío"],
-  tax: ["impuesto", "impuestos", "vat", "estimated tax to be collected"],
+	tax: ["estimated tax", "impuesto", "impuestos",
+		"vat", "estimated tax to be collected", "estimated pst/rst/qst", "estimated gst/hst"
+  ],
   total_before_tax: ["before tax", "antes de impuestos", "total before vat"],
   grand_total: ["grand total", "total del pedido", "total"],
   payment_total: ["payment total", "total del pago", "payment grand total"],
@@ -56,6 +58,8 @@ export function extractOrderCost(doc: Document, context: {domain?: string}) {
 
 		const isPaymentRow = matchLabel(label, LABEL_MAP.payment_total) || label.includes("payment");
 
+		console.log(label)
+
 
     /* ---------- Payment Total ---------- */
     if (matchLabel(label, LABEL_MAP.payment_total)) {
@@ -72,7 +76,7 @@ export function extractOrderCost(doc: Document, context: {domain?: string}) {
 
     /* ---------- Tax ---------- */
     if (matchLabel(label, LABEL_MAP.tax)) {
-      cost.tax = amount;
+			cost.tax = (cost.tax ?? 0) + amount;
       continue;
     }
 

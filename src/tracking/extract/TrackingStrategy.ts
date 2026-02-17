@@ -59,3 +59,14 @@ export class SpanishCarrierStrategy implements TrackingStrategy {
     return text.replace(/Se envió con/i, "").trim();
   }
 }
+
+export class DeliveryByStrategy implements CarrierStrategy {
+  match(text: string): boolean {
+    return /Delivery By/i.test(text);
+  }
+
+  extract(text: string): string {
+    return text.replace(/Delivery By/i, "").trim();
+  }
+}
+

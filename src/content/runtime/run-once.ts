@@ -9,7 +9,8 @@ const SOURCES = {
 	"us": "AMZ_US",
 	"uk": "AMZ_UK",
 	"de": "AMZ_DE",
-	"mx": "AMZ_MX"
+	"mx": "AMZ_MX",
+	"ca": "AMZ_CA"
 }
 
 export function ensureOrdersReady(timeout = 30000): Promise<void> {
@@ -63,6 +64,9 @@ import { buildContext } from './env';
 const context = buildContext();
 
 export async function runOnce() {
+  const  isRunning = !isTaskRunning();
+	console.log("isRunning", isRunning);
+
   if (!isTaskRunning()) return;
 
   await ensureOrdersReady();
@@ -86,7 +90,7 @@ export async function runOnce() {
 	}
 
 	console.log(user)
-  sendClickLog(user.email);
+  // sendClickLog(user.email);
 
   try {
     const isDone = await syncOrders(user, context);

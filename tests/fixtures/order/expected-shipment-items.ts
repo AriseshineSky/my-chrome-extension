@@ -80,4 +80,14 @@ export const EXPECTED_SHIPMENT_ITEMS = {
 			priceText: '$1,131.00'
 		}
   },
+  "order/ca/701-0633616-0122637.html": {
+		B0GKFJRFH4: {
+			asin: 'B0GKFJRFH4',
+			quantity: 1,
+			originalPrice: 16.30,
+			currencySymbol: "$",
+			originalCost: 16.30,
+			priceText: '$16.30'
+		}
+  },
 };

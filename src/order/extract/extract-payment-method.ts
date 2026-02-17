@@ -1,5 +1,6 @@
 const BRAND_MAP: Record<string, string> = {
   "American Express": "AMEX",
+	"AmericanExpress": "AMEX",
   "Amex": "AMEX",
   "Visa": "Visa",
   "MasterCard": "MasterCard",
@@ -41,7 +42,26 @@ export function extractPaymentMethod(doc: Document): string | null {
     if (text) return text;
   }
 
-  /* ---------------- 2️⃣ Next.js (__NEXT_DATA__) ---------------- */
+	/* ---------------- 2️⃣ CA React 结构 ---------------- */
+
+  const caBrand = doc
+    .querySelector('[data-testid="method-details-name"]')
+    ?.textContent
+    ?.trim();
+
+  const caLast4 = doc
+    .querySelector('[data-testid="method-details-number"]')
+    ?.textContent
+    ?.trim();
+
+  if (caBrand || caLast4) {
+    const brand = normalizeBrand(caBrand);
+    return [brand, caLast4 ? `ending in ${caLast4}` : null]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  /* ---------------- 3 Next.js (__NEXT_DATA__) ---------------- */
 
   const next = doc.querySelector("#__NEXT_DATA__");
   if (next?.textContent) {
