@@ -70,7 +70,7 @@ export const EXPECTED_SHIPMENT_ITEMS = {
 			priceText: '£7.99'
 		}
   },
-  "order/702-8792653-5071433.html": {
+  "order/mx/702-8792653-5071433.html": {
 		B07GT6LGZH: {
 			asin: 'B07GT6LGZH',
 			quantity: 1,
