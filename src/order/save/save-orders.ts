@@ -6,11 +6,12 @@ import { Order } from "@/domain/Order";
 export async function saveOrders(
   user: { email: string, source: string },
   orders: Order[],
+  context: { domain?: string }
 ) {
   if (!orders.length) return;
 
   const records = orders.map(order =>
-    toOrderRecord(order),
+    toOrderRecord(order, context),
   );
 
   await post({orders: records, user_email: user.email, source: user.source});

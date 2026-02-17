@@ -26,3 +26,8 @@ export function isLogged(country: string): boolean {
   return cookieKey ? document.cookie.includes(cookieKey) : false;
 }
 
+export function buildContext(): { domain?: string, country?: string } {
+  const country = getCurrentAmazonCountry();
+  const domain = country ? DOMAIN_BY_COUNTRY[country] : undefined;
+  return { domain, country };
+}

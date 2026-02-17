@@ -4,6 +4,7 @@ import { normalizeShipment } from "@/shipment/domain/normalize-shipment";
 
 export function toOrderRecord(
   order: Order,
+  context: { domain?: string }
 ) {
   const cost = order.cost;
 
@@ -28,7 +29,7 @@ export function toOrderRecord(
 			payment_total: cost.payment_total,
 		},
 
-    shipments: Object.values(order.shipments ?? []).map(normalizeShipment)
+    shipments: Object.values(order.shipments ?? []).map( raw => normalizeShipment(raw, context))
   };
 }
 

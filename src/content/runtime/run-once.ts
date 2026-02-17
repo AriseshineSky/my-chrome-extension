@@ -58,6 +58,10 @@ export function ensureOrdersReady(timeout = 30000): Promise<void> {
   });
 }
 
+import { buildContext } from './env';
+
+const context = buildContext();
+
 export async function runOnce() {
   if (!isTaskRunning()) return;
 
@@ -85,7 +89,7 @@ export async function runOnce() {
   sendClickLog(user.email);
 
   try {
-    const isDone = await syncOrders(user);
+    const isDone = await syncOrders(user, context);
     if (isDone) clearTask();
     else refreshTaskTTL();
   } catch (err) {

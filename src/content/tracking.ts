@@ -47,7 +47,7 @@ export async function fetchTrackInfo(delivBox: Element) {
 
   for (const link of links) {
     const text = link.textContent ?? "";
-    if (text.includes("Track package") || text.includes("Lieferung verfolgen")) {
+    if (text.includes("Track package") || text.includes("Lieferung verfolgen") || text.includes("Realizar seguimiento")) {
       const href = link.getAttribute("href");
       if (!href) continue;
 
