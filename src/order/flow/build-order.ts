@@ -10,11 +10,12 @@ import { Order } from "@/domain/Order";
 
 export async function buildOrder(
   orderCard: Element,
+  context: {domain?: string}
 ): Promise<Order> {
   const summary = extractOrderSummary(orderCard);
   const detailDoc = await fetchOrderDetail(orderCard);
 
-	const rawCost = extractOrderCost(detailDoc);
+	const rawCost = extractOrderCost(detailDoc, context);
 	const cost = normalizeOrderCost(rawCost);
   const address = extractShippingAddress(detailDoc);
   const paymentMethod = extractPaymentMethod(detailDoc);

@@ -10,7 +10,7 @@ import { Order } from "@/domain/Order";
 export async function syncOrders(user: any,  context: { domain?: string }) {
 	while (true) {
 		console.log("new page")
-		const orders = await collectOrdersOnPage();
+		const orders = await collectOrdersOnPage(context);
 		const validOrders = orders.filter(
 			(o): o is Order => o !== null,
 		);

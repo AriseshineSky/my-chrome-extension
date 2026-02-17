@@ -27,7 +27,7 @@ export function isLogged(country: string): boolean {
 }
 
 export function buildContext(): { domain?: string, country?: string } {
-  const country = getCurrentAmazonCountry();
+	const country = getCurrentAmazonCountry() ?? undefined;
   const domain = country ? DOMAIN_BY_COUNTRY[country] : undefined;
   return { domain, country };
 }
