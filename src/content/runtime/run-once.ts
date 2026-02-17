@@ -90,7 +90,7 @@ export async function runOnce() {
 	}
 
 	console.log(user)
-  // sendClickLog(user.email);
+  sendClickLog(user.email);
 
   try {
     const isDone = await syncOrders(user, context);
