@@ -52,31 +52,40 @@ async function retryFetch<T>(
   }
 
   return { ok: false, error: "retry_exhausted" };
+
 }
 
 export async function post(payload: any) {
-  const result = await retryFetch(
-    `${BASE_URL}/batch_create?token=${API_TOKEN}`,
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-    },
-  );
+  try {
+    const result = await retryFetch(
+      `${BASE_URL}/batch_create?token=${API_TOKEN}`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      },
+    );
 
-  await sendLog({
-    source: "amazon-order",
-    level: result.ok ? "info" : "error",
-    message: result.ok
-      ? `Synced orders`
-      : `Sync failed`,
-    metadata: {
-      order_count: payload.orders.length,
-      result,
-    },
-  });
+    // 日志也包裹 try/catch
+    try {
+      await sendLog({
+        source: "amazon-order",
+        level: result.ok ? "info" : "error",
+        message: result.ok ? `Synced orders` : `Sync failed`,
+        metadata: {
+          order_count: payload.orders.length,
+          result,
+        },
+      });
+    } catch {
+      // ❌ 日志失败不影响主流程
+    }
 
-  return result.ok;
+    return result.ok;
+  } catch (err) {
+    console.error("Failed to post orders:", err);
+    return false; // ❌ 异常也不抛出去
+  }
 }
 
 const LOG_ENDPOINT = "https://logging.everymarket.com/api/v1/logs";
@@ -92,15 +101,15 @@ export async function sendLog(log: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Log-Source": "amazon-plugin", // 👈 保留来源标识
+        "X-Log-Source": "amazon-plugin",
       },
       body: JSON.stringify({
         ...log,
         logged_at: new Date().toISOString(),
       }),
     });
-  } catch {
-    // ❗日志失败永远不能影响主流程
+  } catch (err) {
+    console.warn("Logging failed, ignored", err);
   }
 }
 
