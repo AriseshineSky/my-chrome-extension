@@ -10,8 +10,6 @@ describe("extractTrackInfo (real HTML fixtures)", () => {
         const doc = loadHTML(file);
         const actual = extractTrackInfo(doc);
 
-        console.log(file, actual);
-
         expect(actual).toEqual(expected);
       });
     },

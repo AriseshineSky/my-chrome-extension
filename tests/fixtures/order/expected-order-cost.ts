@@ -1,71 +1,80 @@
 export const EXPECTED_ORDER_INFO = {
-	"order/114-8761752-1634604.html": {
+	"order/us/114-8761752-1634604.html": {
 		subTotal: 69.45,
 		shipping: 0,
 		tax: 0,
 		original_total: 69.45,
 		original_currency: "USD",
 		original_cost: 69.45,
-    "total_before_tax": 69.45,
+		total_before_tax: 69.45,
 	},
-  "order/111-6784099-6345037.html": {
+  "order/us/111-6784099-6345037.html": {
 		subTotal: 4.48,
-		shipping: 0,
 		tax: 0.36,
 		original_total: 4.84,
 		original_currency: "USD",
 		original_cost: 4.84,
-    "total_before_tax": 4.48,
+		shipping: 0,
+		total_before_tax: 4.48,
   },
-  "order/202-9691085-8778754.html": {
+  "order/uk/202-9691085-8778754.html": {
     "original_cost": 5.49,
     "original_currency": "GBP",
     "original_total": 5.49,
     "payment_currency": "USD",
     "payment_total": 7.56,
-    "shipping": 0,
     "subTotal": 5.49,
   },
-  "order/202-2103857-5887544.html": {
+  "order/us/202-2103857-5887544.html": {
     "original_cost": 16.99,
     "original_currency": "GBP",
     "original_total": 16.99,
     "payment_currency": "USD",
     "payment_total": 23.39,
-    "shipping": 0,
     "subTotal": 14.16,
     "tax": 2.83,
     "total_before_tax": 14.16,
   },
-  "order/202-6344826-2669928.html": {
+  "order/uk/202-6344826-2669928.html": {
     "original_cost": 83.8,
     "original_currency": "GBP",
     "original_total": 83.8,
     "payment_currency": "USD",
     "payment_total": 114.92,
-    "shipping": 0,
     "subTotal": 69.84,
     "tax": 13.96,
     "total_before_tax": 69.84,
   },
-  "order/205-1272725-0305915.html": {
-     "original_cost": 27.44,
-     "original_currency": "USD",
-     "original_total": 27.44,
-     "payment_currency": "USD",
-     "payment_total": 27.44,
-     "shipping": 0,
-     "subTotal": 26.8,
-     "tax": 0,
-     "total_before_tax": 26.8,
+  "order/uk/205-1272725-0305915.html": {
+	 original_cost: 27.44,
+	 original_total: 27.44,
+	 original_currency: "USD",
+	 payment_currency: "USD",
+	 payment_total: 27.44,
+	 subTotal: 26.8,
+	 tax: 0,
+ 	 total_before_tax: 26.8,
   },
-  "order/204-8358722-5934724.html": {
+  "order/uk/204-8358722-5934724.html": {
 		subTotal: 6.66,
-		shipping: 0,
-		total_before_tax: 6.66,
 		tax: 1.33,
 		original_total: 7.99,
 		original_currency: 'GBP',
-		original_cost: 7.99
+		original_cost: 7.99,
+		total_before_tax: 6.66
+  },
+  "order/mx/702-0137443-3750617.html": {
+		subTotal: 208.35,
+		shipping: 0,
+		original_total: 208.35,
+		original_currency: 'MXN',
+		original_cost: 208.35
+  },
+  "order/mx/702-8792653-5071433.html": {
+		subTotal: 1131.00,
+		shipping: 0,
+		original_total: 1131.00,
+		original_currency: 'MXN',
+		original_cost: 1131.00
   },
 };

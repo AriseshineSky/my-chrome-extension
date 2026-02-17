@@ -11,8 +11,6 @@ describe("extract shipping address", () => {
         const doc = loadHTML(file);
         const actual = extractShippingAddress(doc);
 
-        console.log(file, actual);
-
         expect(actual).toEqual(expected);
       });
     },
