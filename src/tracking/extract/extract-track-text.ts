@@ -1,29 +1,40 @@
-import { TrackingInfo } from "../../domain/Tracking";
+import {ShippedWithStrategy, AmazonCarrierStrategy, SpanishTrackingStrategy, SpanishCarrierStrategy,  EnglishTrackingStrategy } from "./TrackingStrategy";
+
+const trackingStrategies = [
+  new EnglishTrackingStrategy(),
+  new SpanishTrackingStrategy(),
+];
+
+const carrierStrategies = [
+  new AmazonCarrierStrategy(),
+  new ShippedWithStrategy(),
+	new SpanishCarrierStrategy(),
+];
 
 export function extractTrackInfoFromText(
   trackNoStr: string | null,
   carrierStr: string | null,
-): TrackingInfo {
+) {
   let tracking: string | null = null;
   let carrier: string | null = null;
 
   if (trackNoStr) {
-    const match = trackNoStr.match(/Tracking\s*ID:\s*(\S+)/i);
-    tracking = match ? match[1] : null;
+    for (const strategy of trackingStrategies) {
+      if (strategy.match(trackNoStr)) {
+        tracking = strategy.extract(trackNoStr);
+        break;
+      }
+    }
   }
 
   if (carrierStr) {
-    const text = carrierStr.trim();
-
-    if (/amazon/i.test(text)) {
-      carrier = "Amazon";
-    } else if (/shipped with/i.test(text)) {
-      carrier = text.replace(/shipped with/i, "").trim();
-    } else if (/delivery by/i.test(text)) {
-      carrier = text.replace(/delivery by/i, "").trim();
-    } else {
-      carrier = text;
+    for (const strategy of carrierStrategies) {
+      if (strategy.match(carrierStr)) {
+        carrier = strategy.extract(carrierStr);
+        break;
+      }
     }
+    carrier ??= carrierStr.trim();
   }
 
   return { tracking, carrier };
