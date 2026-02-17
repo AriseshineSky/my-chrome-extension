@@ -35,7 +35,6 @@ async function retryFetch<T>(
       }
 
       if (resp.status >= 400 && resp.status < 500) {
-        // 客户端错误：不重试
         return {
           ok: false,
           status: resp.status,
@@ -55,6 +54,13 @@ async function retryFetch<T>(
 
 }
 
+export async function sendLogFromContent(log: any) {
+  chrome.runtime.sendMessage({
+    type: 'SEND_LOG',
+    log,
+  });
+}
+
 export async function post(payload: any) {
   try {
     const result = await retryFetch(
@@ -66,9 +72,8 @@ export async function post(payload: any) {
       },
     );
 
-    // 日志也包裹 try/catch
-    try {
-      await sendLog({
+		sendLogFromContent(
+			 {
         source: "amazon-order",
         level: result.ok ? "info" : "error",
         message: result.ok ? `Synced orders` : `Sync failed`,
@@ -76,10 +81,8 @@ export async function post(payload: any) {
           order_count: payload.orders.length,
           result,
         },
-      });
-    } catch {
-      // ❌ 日志失败不影响主流程
-    }
+      }
+		)
 
     return result.ok;
   } catch (err) {
@@ -89,6 +92,7 @@ export async function post(payload: any) {
 }
 
 const LOG_ENDPOINT = "https://logging.everymarket.com/api/v1/logs";
+const LOG_API_TOKEN = "7dfbd1c8a4e2453d9b2b569f37ce8b1c3c09e89157b7268cc60b6a4e35a68c51";
 
 export async function sendLog(log: {
   source: string;
@@ -101,7 +105,8 @@ export async function sendLog(log: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Log-Source": "amazon-plugin",
+				"X-Log-Source": "frontend", 
+        "Authorization": `Bearer ${LOG_API_TOKEN}`,
       },
       body: JSON.stringify({
         ...log,
