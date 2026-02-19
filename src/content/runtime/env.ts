@@ -1,10 +1,10 @@
 // src/content/runtime/env.ts
 const DOMAIN_BY_COUNTRY: Record<string, string> = {
-  us: "amazon.com",
+	mx: "amazon.com.mx",
   uk: "amazon.co.uk",
   de: "amazon.de",
-	mx: "amazon.com.mx",
-	ca: "amazon.ca"
+	ca: "amazon.ca",
+  us: "amazon.com",
 };
 
 const COOKIE_BY_COUNTRY: Record<string, string> = {
