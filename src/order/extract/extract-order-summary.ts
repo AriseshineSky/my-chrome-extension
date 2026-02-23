@@ -1,8 +1,8 @@
 // src/order/extract/extract-order-summary.ts
 
-const ORDER_NUMBER_LABELS = ["Order #", "Pedido n.º"]
+const ORDER_NUMBER_LABELS = ["Order #", "Pedido n.º", "Order No."]
 const ORDER_DATE_LABELS = ["Order Placed", "Pedido realizado"];
-const SHIP_TO_LABELS = ["Ship To", "Enviar a"];
+const SHIP_TO_LABELS = ["Ship To", "Enviar a", "Send to"];
 const PLACED_BY_LABELS = ["Placed By", "Realizado por"];
 
 export function extractOrderSummary(root: Element) {
