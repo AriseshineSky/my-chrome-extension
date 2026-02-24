@@ -3,5 +3,6 @@ export const RATES: Record<string, number> = {
   EUR: 1.08,
   JPY: 0.0067,
   CAD: 0.74,
+	MXN: 0.058,
 }
 

@@ -11,7 +11,8 @@ export async function fetchTrackingPage(
 
     if (
       text.includes("Track package") ||
-      text.includes("Lieferung verfolgen")
+      text.includes("Lieferung verfolgen") ||
+      text.includes("Realizar seguimiento de paquete")
     ) {
       const href = link.getAttribute("href");
       if (!href) continue;
