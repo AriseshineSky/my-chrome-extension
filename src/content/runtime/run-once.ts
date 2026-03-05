@@ -13,32 +13,55 @@ const SOURCES = {
 	"ca": "AMZ_CA"
 }
 
-export function ensureOrdersReady(timeout = 30000): Promise<void> {
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function ensureOrdersReady(timeout = 90000): Promise<void> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
+    let firstCardsSeenAt: number | null = null;
 
-    const check = () => {
-      // 1️⃣ 订单号（最终一定会出现）
+    const check = async () => {
+      // 1️⃣ Order number text
       const hasOrderNumber =
         document.body.innerText.match(/\b\d{3}-\d{7}-\d{7}\b/);
-			console.log(hasOrderNumber)
 
-      // 2️⃣ 订单详情链接（US / UK / Business 通用）
+      // 2️⃣ Order detail links
       const orderDetailLinks =
         document.querySelectorAll(
           'a[href*="order-details"], a[href*="your-account"]'
         ).length > 0;
 
-			console.log(orderDetailLinks)
-
-      // 3️⃣ 商品标题链接（不是 skeleton）
+      // 3️⃣ Product links
       const productLinks =
         document.querySelectorAll(
           'a[href*="/dp/"], a[href*="/gp/product/"]'
         ).length > 0;
 
-			console.log(productLinks)
-      if (hasOrderNumber && (orderDetailLinks || productLinks)) {
+      const cards = document.querySelectorAll("div.order-card, div#orderCard");
+      const hasOrderCards = cards.length > 0;
+      const hasSkeletonCards =
+        hasOrderCards && Array.from(cards).some(card => card.querySelector(".skeleton"));
+
+      if (hasOrderCards && firstCardsSeenAt === null) {
+        firstCardsSeenAt = Date.now();
+      }
+
+      const cardsStableForMs =
+        firstCardsSeenAt === null ? 0 : Date.now() - firstCardsSeenAt;
+      const fallbackReady = hasOrderCards && cardsStableForMs > 8000;
+
+      if (
+        hasOrderCards && (
+          hasOrderNumber ||
+          orderDetailLinks ||
+          productLinks ||
+          !hasSkeletonCards ||
+          fallbackReady
+        )
+      ) {
+        await sleep(1000);
         resolve();
         return;
       }
@@ -52,10 +75,12 @@ export function ensureOrdersReady(timeout = 30000): Promise<void> {
         return;
       }
 
-      setTimeout(check, 500);
+      setTimeout(() => {
+        void check();
+      }, 400);
     };
 
-    check();
+    void check();
   });
 }
 
@@ -73,11 +98,12 @@ export async function runOnce() {
   refreshTaskTTL();
 
   const country = getCurrentAmazonCountry();
+	console.log("current country", country)
   if (!country || !isLogged(country)) {
     clearTask();
     return;
   }
-
+	console.log("begin to check user")
   const user = await loadUser();
   if (!user) {
     clearTask();
@@ -101,4 +127,3 @@ export async function runOnce() {
     clearTask();
   }
 }
-
