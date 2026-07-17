@@ -1,54 +1,95 @@
-# React + TypeScript + Vite
+# Amazon Order Collect
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Chrome MV3 extension that scrapes Amazon order history (list → detail → shipment → tracking) and uploads structured order data to EveryMarket.
 
-Currently, two official plugins are available:
+Supports **US / UK / DE / MX / CA** marketplaces.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Requirements
 
-## Expanding the ESLint configuration
+- Node.js 18+
+- [pnpm](https://pnpm.io/) (preferred; `npm` also works)
+- Chrome / Chromium
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Setup
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Before shipping, set the API token in `src/services/api.ts` (`API_TOKEN`) to a real value. The default placeholder will not authenticate against production.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Develop
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+pnpm dev
 ```
+
+Vite serves the popup with HMR. Content/background scripts still need a full build to load in Chrome.
+
+## Build
+
+```bash
+pnpm build
+```
+
+Output goes to `build/`. Load the extension:
+
+1. Open `chrome://extensions`
+2. Enable **Developer mode**
+3. **Load unpacked** → select the `build/` directory
+
+## Usage
+
+1. Sign in to Amazon on the target marketplace (e.g. `amazon.com`, `amazon.ca`)
+2. Open **Your Orders** / order history
+3. Click the extension icon → **Fetch Orders**
+
+The content script waits for the orders page to hydrate, walks order cards page by page, fetches each order detail (items, cost, payment, address, tracking), and posts records to the EveryMarket API.
+
+## Tests
+
+Tests use [Vitest](https://vitest.dev/) + jsdom against HTML fixtures under `tests/fixtures/`.
+
+```bash
+# all tests
+npx vitest run
+
+# focused suites (recommended while iterating on extractors)
+npx vitest run tests/order/extract tests/tracking/extract-track-info.test.ts
+```
+
+Some legacy suites under `tests/*.test.ts` still import removed paths and may fail; prefer the suites under `tests/order/`, `tests/shipment/`, and `tests/tracking/`.
+
+## Project layout
+
+```
+src/
+  background/          # service worker (popup ↔ content messaging)
+  content/             # content-script entry + runtime (task TTL, login/env)
+  order/               # list, extract, build, save, pagination
+  shipment/            # shipment extract + normalize
+  tracking/            # tracking page fetch + parse
+  money/               # parse money, FX, normalize costs
+  domain/              # Order / Shipment / Tracking types
+  persistence/         # domain → API payload mappers
+  services/api.ts      # EveryMarket HTTP client
+  manifest.json        # MV3 manifest (copied into build/)
+tests/
+  fixtures/            # saved Amazon HTML (us/uk/mx/ca/…)
+  order|shipment|tracking/  # extractor & flow tests
+```
+
+## Scripts
+
+| Command        | Description              |
+|----------------|--------------------------|
+| `pnpm dev`     | Vite dev server (popup)  |
+| `pnpm build`   | Typecheck + production build → `build/` |
+| `pnpm lint`    | ESLint                   |
+| `npx vitest run` | Run unit/integration tests |
+
+## Notes
+
+- Build uses inline source maps and disables minify for easier debugging in Chrome.
+- Order sync stops when orders are older than the configured expiry window (`is-order-expired`).
+- Root-level scraped HTML dumps and `build.zip` are local debug artifacts; do not commit them.
