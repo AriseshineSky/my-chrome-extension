@@ -24,6 +24,11 @@ export function extractTrackInfo(doc: Document): TrackingInfo {
   const carrierStr =
     doc.querySelector(CARRIER_SELECTOR)?.textContent ?? null;
 
-  return extractTrackInfoFromText(trackNoStr, carrierStr);
-}
+  const normalizedCarrier = carrierStr?.trim() ?? null;
+  const carrierCandidate =
+    normalizedCarrier && /^delivery info$/i.test(normalizedCarrier)
+      ? null
+      : normalizedCarrier;
 
+  return extractTrackInfoFromText(trackNoStr, carrierCandidate);
+}

@@ -9,6 +9,7 @@ function inferDomainFromFile(file: string): string {
   if (file.includes("/mx/")) return "www.amazon.com.mx";
   if (file.includes("/uk/")) return "www.amazon.co.uk";
   if (file.includes("/de/")) return "www.amazon.de";
+  if (file.includes("/ca/")) return "www.amazon.ca";
   return "www.amazon.com";
 }
 
@@ -24,4 +25,3 @@ describe("extractOrderCost", () => {
     },
   );
 });
-

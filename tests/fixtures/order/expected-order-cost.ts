@@ -88,4 +88,15 @@ export const EXPECTED_ORDER_INFO = {
     payment_total: 18.36,
 		tax: 2.34,
   },
+  "order/ca/701-3021288-3362634.html": {
+    subTotal: 16.43,
+    shipping: 0,
+    total_before_tax: 16.43,
+    tax: 0,
+    original_total: 20.56,
+    original_currency: "USD",
+    original_cost: 20.56,
+    payment_currency: "USD",
+    payment_total: 20.56,
+  },
 };

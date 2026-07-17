@@ -1,7 +1,7 @@
 const BASE_URL = "https://fulfill.everymarket.com/api/v3/amazon_orders";
 const API_TOKEN = "your_secret_token_here";
 type ApiResult<T> =
-  | { ok: true; data: T }
+  | { ok: true; data: T | null }
   | { ok: false; status?: number; error: string };
 
 export async function fetchInfo(url: string): Promise<Document> {
@@ -20,6 +20,20 @@ export function sleep(ms: number): Promise<void> {
 }
 
 const headers = new Headers({ "Content-Type": "application/json" });
+
+async function parseResponseData<T>(resp: Response): Promise<T | null> {
+  if (resp.status === 204 || resp.status === 205) return null;
+
+  const text = await resp.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 async function retryFetch<T>(
   url: string,
   options: RequestInit,
@@ -31,7 +45,7 @@ async function retryFetch<T>(
       const resp = await fetch(url, options);
 
       if (resp.ok) {
-        return { ok: true, data: await resp.json() };
+        return { ok: true, data: await parseResponseData<T>(resp) };
       }
 
       if (resp.status >= 400 && resp.status < 500) {
@@ -130,4 +144,3 @@ export async function sendClickLog(email?: string) {
     },
   );
 }
-

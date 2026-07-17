@@ -56,11 +56,6 @@ export function extractOrderCost(doc: Document, context: {domain?: string}) {
 
     const amount = parsed.amount;
 
-		const isPaymentRow = matchLabel(label, LABEL_MAP.payment_total) || label.includes("payment");
-
-		console.log(label)
-
-
     /* ---------- Payment Total ---------- */
     if (matchLabel(label, LABEL_MAP.payment_total)) {
       cost.payment_total = amount;

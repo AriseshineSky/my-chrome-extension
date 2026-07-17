@@ -91,6 +91,25 @@ export function extractPaymentMethod(doc: Document): string | null {
     }
   }
 
+  const paymentWidgetText = doc
+    .querySelector('[data-component="viewPaymentPlanSummaryWidget"]')
+    ?.textContent
+    ?.replace(/\s+/g, " ")
+    .trim();
+
+  if (paymentWidgetText) {
+    const cardMatch = paymentWidgetText.match(
+      /(American\s*Express|AmericanExpress|Amex|Visa|Master\s*Card|Mastercard)\s*[•*]{2,}\s*(\d{4})/i,
+    );
+
+    if (cardMatch) {
+      const brand = normalizeBrand(cardMatch[1]);
+      const last4 = cardMatch[2];
+      if (brand && last4) {
+        return `${brand} ending in ${last4}`;
+      }
+    }
+  }
+
   return null;
 }
-

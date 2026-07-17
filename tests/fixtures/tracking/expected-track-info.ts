@@ -34,6 +34,10 @@ export const EXPECTED_TRACK_INFO: Record<
     tracking: "INTLCMH833418027",
     carrier: "Intelcom Courrier Canada Inc.",
   },
+  "tracking/ca/PtK3gfSlG.html": {
+    tracking: "INTLCMH915048052",
+    carrier: null,
+  },
   "tracking/mx/DBGR5fJnJ.html": {
     tracking: "9087037061",
     carrier: "It was  DHL.",

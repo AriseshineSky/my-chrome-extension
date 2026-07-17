@@ -164,3 +164,31 @@ describe("extractOrderSummary (mx orders list)", () => {
     });
   });
 });
+
+describe("extractOrderSummary (CA biz orders list)", () => {
+  const doc = loadHTML("ca-biz-orders.html");
+
+  const orderCards = Array.from(
+    doc.querySelectorAll(ORDER_SELECTOR),
+  );
+
+  it("should find order cards on list page", () => {
+    expect(orderCards.length).toBeGreaterThan(0);
+  });
+
+  it("extracts known CA business order summary", () => {
+    const orderCard = orderCards.find(card =>
+      card.textContent?.includes("701-3021288-3362634"),
+    );
+
+    expect(orderCard).toBeDefined();
+
+    const summary = extractOrderSummary(orderCard!);
+    expect(summary).toEqual({
+      orderNumber: "701-3021288-3362634",
+      orderDate: "March 4, 2026",
+      shipTo: "Hyeonmo Goo",
+      placedBy: "Jinchul Kim",
+    });
+  });
+});

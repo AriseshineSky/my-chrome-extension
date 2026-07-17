@@ -6,8 +6,7 @@ export async function collectOrdersOnPage(
 	context: { domain?: string }
 ) {
   const cards = document.querySelectorAll(ORDER_SELECTOR);
-
-	console.log(cards)
+	console.log("OrdersCount: ", cards.length)
 
   const orders = await Promise.all(
     Array.from(cards).map(card =>
@@ -17,4 +16,3 @@ export async function collectOrdersOnPage(
 
   return orders.filter(Boolean);
 }
-
